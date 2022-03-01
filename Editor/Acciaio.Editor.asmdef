@@ -1,0 +1,18 @@
+{
+    "name": "Acciaio.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:cab1a99322eb7df42b056e6550ddcc75"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

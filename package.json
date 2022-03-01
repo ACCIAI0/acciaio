@@ -1,0 +1,6 @@
+{
+    "name":"Acciaio",
+    "version": "1.0.0",
+    "description": "A library offering a ready-to-go architecture for bootstrapping games, manage loading seamless transitions between scenes and organizing core functionalities (Systems).",
+    "unity": "2020.3"
+}
