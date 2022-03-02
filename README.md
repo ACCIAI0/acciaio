@@ -1,3 +1,6 @@
 # Acciaio Systems
 
-A C# library developed for Unity offering a ready-to-go architecture for bootstrapping games, manage loading seamless transitions between scenes and organizing core functionalities (Systems).
+A package that offers the following main functionalities:
+- **Systems architecture**
+- Easy to use Editor Scenes setup settings
+- Extension methods for common `UnityEngine` types such as `Color` and `Vector3`.
