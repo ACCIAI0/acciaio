@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace Acciaio
 {
-	public abstract class BaseSystem<T> : Singleton<T>, ISystem where T : BaseSystem<T>
+	public abstract class BaseSystem<TSystem> : Singleton<TSystem>, ISystem where TSystem : BaseSystem<TSystem>
 	{
-		/// <summary>
-		/// True after the Run() method is called. False if it's never called or after Shutdown() is called.
-		/// </summary>
 		public abstract bool IsRunning { get; }
 
 		private IEnumerator InternalRun()
@@ -46,18 +43,13 @@ namespace Acciaio
 		/// </summary>
 		protected abstract IEnumerator ShutdownRoutine();
 
-		/// <summary>
-		/// Starts up the System. It's yieldable in coroutines.
-		/// </summary>
+		
 		public YieldInstruction Run()
 		{
 			enabled = true;
 			return StartCoroutine(InternalRun());
 		}
 		
-		/// <summary>
-		/// Shuts down the System. It's yieldable in coroutines.
-		/// </summary>
 		public YieldInstruction Shutdown()
 		{
 			enabled = true;

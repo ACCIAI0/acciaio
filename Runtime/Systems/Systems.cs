@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,7 @@ namespace Acciaio
 							.Select(o => o.GetComponent<ISystem>())
 							.Where(o => o != null)
 							.ToList();
+					systems.ForEach(s => Systems._systems.Add(s.GetType(), s));
 					CoroutineRunner.Start(Coroutine(systems));
 				};
 			}
@@ -55,12 +57,46 @@ namespace Acciaio
 			}
         }
 
+		private static readonly Dictionary<Type, ISystem> _systems = new Dictionary<Type, ISystem>();
+
 		public static bool Ready { get; private set; }
 
+		/// <summary>
+		/// Initializes the Systems architecture. To wait for the operations to complete, yield on this call in a coroutine.
+		/// </summary>
 		public static CustomYieldInstruction Load()
 		{
 			if (Ready) return NoOp.Instance;
 			return new SystemOperation();
+		}
+
+		/// <summary>
+		/// Once all the Systems have been loaded, they can be accessed through calls to this function.
+		/// </summary>
+		/// <typeparam name="T">The type of the system to retrieve. Must derive from ISystem.</typeparam>
+		public static T GetSystem<T>() where T : ISystem
+		{
+			if (!Ready) throw new InvalidOperationException("Systems are not Ready. Ensure Load() has been called before this.");
+			return (T)_systems[typeof(T)];
+		}
+
+		/// <summary>
+		/// Once all the Systems have been loaded, they can be accessed through calls to this function.
+		/// Returns True if the system was found, False otherwise.
+		/// </summary>
+		/// <typeparam name="T">The type of the system to retrieve. Must derive from ISystem.</typeparam>
+		public static bool TryGetSystem<T>(out T system) where T : ISystem
+		{
+			system = default;
+			if (!Ready) 
+			{
+				Debug.LogError("Systems are not Ready. Ensure Load() has been called before this.");
+				return false;
+			}
+
+			bool result = _systems.TryGetValue(typeof(T), out ISystem s);
+			system = (T)s;
+			return result;
 		}
     }
 }
