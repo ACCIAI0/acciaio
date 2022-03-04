@@ -5,39 +5,34 @@ using UnityEngine;
 
 namespace Acciaio.Editor
 {
-	[CreateAssetMenu(fileName="EditorScenesSetup", menuName="Silver Lomami/Editor Scenes Setup")]
+	[CreateAssetMenu(fileName="EditorScenesSettings", menuName="Acciaio/Editor Scenes Settings")]
 	[InitializeOnLoad]
-	public class EditorScenesSetup : ScriptableObject
+	public class EditorScenesSettings : ScriptableObject
 	{
 		/// <summary>
 		/// Editor Prefs key for retrieving the scene that is currently being edited.
 		/// </summary>
 		public const string EDITING_SCENE_PREFS_KEY = "Acciaio.Editor.EditingScene";
 
-		/// <summary>
-		/// Editor Prefs key for retrieving the the scene to play at the start for local override.
-		/// </summary>
-		public const string LOCAL_START_OVERRIDE_KEY = "Acciaio.Editor.StartOverrideScene";
+		private static EditorScenesSettings _instance;
 
-		private static EditorScenesSetup _instance;
-
-		private static EditorScenesSetup Instance
+		private static EditorScenesSettings Instance
 		{
 			get
 			{
 				if (_instance == null)
 				{
-					string[] assets = AssetDatabase.FindAssets($"t:{nameof(EditorScenesSetup)}");
+					string[] assets = AssetDatabase.FindAssets($"t:{nameof(EditorScenesSettings)}");
 					if (assets.Length == 0) return null;
 					if (assets.Length > 1)
 						Debug.LogWarning("Multiple Editor Scenes Setups found, only one will be used.");
-					_instance = AssetDatabase.LoadAssetAtPath<EditorScenesSetup>(AssetDatabase.GUIDToAssetPath(assets[0]));
+					_instance = AssetDatabase.LoadAssetAtPath<EditorScenesSettings>(AssetDatabase.GUIDToAssetPath(assets[0]));
 				}
 				return _instance;
 			}
 		}
 
-        static EditorScenesSetup() => EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        static EditorScenesSettings() => EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
 		private static void SetPlayModeStartScene(string scene)
 		{
@@ -57,10 +52,7 @@ namespace Acciaio.Editor
 		{
 			if (change == PlayModeStateChange.ExitingEditMode)
 			{
-				string scene = null;
-				if (Instance != null) 
-					scene = EditorPrefs.GetString(LOCAL_START_OVERRIDE_KEY, null) ?? Instance._startupScene;
-				SetPlayModeStartScene(scene);
+				SetPlayModeStartScene(Instance != null && Instance._isActive ? Instance._startupScene : null);
 
 				if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
 				{
@@ -71,6 +63,9 @@ namespace Acciaio.Editor
 			}
 			else if (change == PlayModeStateChange.EnteredEditMode) EditorPrefs.DeleteKey(EDITING_SCENE_PREFS_KEY);
 		}
+
+		[SerializeField]
+		private bool _isActive = false;
 
 		[SerializeField, Scene]
 		private string _startupScene = null;

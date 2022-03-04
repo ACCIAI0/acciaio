@@ -59,6 +59,9 @@ namespace Acciaio.Editor
 		public static string SceneField(string label, string value, bool allowEmpty, string emptyLabel)
 		{
 			string[] scenes = BuildScenesListForField(allowEmpty, emptyLabel);
+
+			if (scenes.Length == 0) return "";
+
 			int index = Mathf.Max(0, System.Array.IndexOf(scenes, value));
 			int newIndex = EditorGUILayout.Popup(label, index, scenes);
 			return scenes[newIndex];
