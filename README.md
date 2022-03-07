@@ -16,7 +16,7 @@ These settings resides in an asset that can be created through **Tools>>Acciaio>
 ___
 ### Quick References
 
-- [Systems](wiki/Systems.md)
+- [Systems](../wiki/Systems.md)
 - [Editor Scenes Settings](wiki/EditorScenesSettings.md)
 - [Extensions](wiki/Extensions.md)
 
