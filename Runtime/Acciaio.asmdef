@@ -17,6 +17,11 @@
             "name": "com.unity.addressables",
             "expression": "1.18",
             "define": "USE_ADDRESSABLES"
+        },
+        {
+            "name": "com.dbrizov.naughtyattributes",
+            "expression": "2.1.4",
+            "define": "USE_NAUGHTY_ATTRIBUTES"
         }
     ],
     "noEngineReferences": false
