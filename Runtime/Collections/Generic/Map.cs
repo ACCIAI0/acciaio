@@ -7,10 +7,10 @@ using System.Linq;
 namespace Acciaio.Collections.Generic
 {
     /// <summary>
-    /// Serializable, generic Dictionary implementation. No more boilerplate code 
+    /// Serializable, generic Dictionary implementation. No more boilerplate code
     /// for when you need to serialize a list of key-value pairs. It's called Map to
-    /// better highlight it's serializable, but it's implemented as a Dictionary which 
-    /// is retrievable by calling AsDictionary(). 
+    /// better highlight it's serializable, but it's implemented as a Dictionary which
+    /// is retrievable by calling AsDictionary().
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
@@ -29,30 +29,28 @@ namespace Acciaio.Collections.Generic
                 Value = kvp.Value;
             }
 
-            public static implicit operator KeyValuePair<TKey, TValue>(Entry entry) => 
-                    new KeyValuePair<TKey, TValue>(entry.Key, entry.Value);
-            public static implicit operator Entry(KeyValuePair<TKey, TValue> pair) => 
-                    new Entry(pair);
+            public static implicit operator KeyValuePair<TKey, TValue>(Entry entry) => new(entry.Key, entry.Value);
+            public static implicit operator Entry(KeyValuePair<TKey, TValue> pair) => new(pair);
         }
 
         private readonly Dictionary<TKey, TValue> _internal;
 
         [SerializeField]
-        private List<Entry> _serializedEntries = default;
+        private List<Entry> _serializedEntries;
 
-        private IDictionary InternalIDict => _internal as IDictionary;
-        private IDictionary<TKey, TValue> InternalGeneric => _internal as IDictionary<TKey, TValue>;
+        private IDictionary InternalIDict => _internal;
+        private IDictionary<TKey, TValue> InternalGeneric => _internal;
 
-        public object this[object key] 
-        { 
-            get => InternalIDict[key]; 
-            set => InternalIDict[key] = value; 
+        public object this[object key]
+        {
+            get => InternalIDict[key];
+            set => InternalIDict[key] = value;
         }
 
-        public TValue this[TKey key] 
-        { 
-            get => _internal[key]; 
-            set => _internal[key] = value; 
+        public TValue this[TKey key]
+        {
+            get => _internal[key];
+            set => _internal[key] = value;
         }
 
         public bool IsFixedSize => InternalIDict.IsFixedSize;
@@ -73,22 +71,22 @@ namespace Acciaio.Collections.Generic
 
         ICollection<TValue> IDictionary<TKey, TValue>.Values => _internal.Values;
 
-        public Map() => 
+        public Map() =>
                 _internal = new Dictionary<TKey, TValue>();
 
-        public Map(IDictionary<TKey, TValue> dict) => 
+        public Map(IDictionary<TKey, TValue> dict) =>
                 _internal = new Dictionary<TKey, TValue>(dict);
-        
-        public Map(IEqualityComparer<TKey> comparer) => 
+
+        public Map(IEqualityComparer<TKey> comparer) =>
                 _internal = new Dictionary<TKey, TValue>(comparer);
 
-        public Map(int capacity) => 
+        public Map(int capacity) =>
                 _internal = new Dictionary<TKey, TValue>(capacity);
 
-        public Map(IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer) => 
+        public Map(IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer) =>
                 _internal = new Dictionary<TKey, TValue>(dict, comparer);
 
-        public Map(int capacity, IEqualityComparer<TKey> comparer) => 
+        public Map(int capacity, IEqualityComparer<TKey> comparer) =>
                 _internal = new Dictionary<TKey, TValue>(capacity, comparer);
 
         public Dictionary<TKey, TValue> AsDictionary() => _internal;
@@ -96,15 +94,18 @@ namespace Acciaio.Collections.Generic
         public void OnAfterDeserialize()
         {
             _internal.Clear();
-            var idict = _internal as IDictionary<TKey, TValue>;
-            int elementsNumber = _serializedEntries.Count;
-            for(int i = 0, check = 0; i < elementsNumber; i++) 
+            var iDict = _internal as IDictionary<TKey, TValue>;
+            var elementsNumber = _serializedEntries.Count;
+            for(int i = 0, check = 0; i < elementsNumber; i++)
             {
                 var entry = _serializedEntries[check];
-                if (_internal.ContainsKey(entry.Key)) check++;
-                else 
+                if (_internal.ContainsKey(entry.Key))
                 {
-                    idict.Add(entry);
+                    check++;
+                }
+                else
+                {
+                    iDict.Add(entry);
                     _serializedEntries.RemoveAt(check);
                 }
             }
@@ -112,7 +113,7 @@ namespace Acciaio.Collections.Generic
 
         public void OnBeforeSerialize()
         {
-            if (_serializedEntries == null) _serializedEntries = new List<Entry>();
+            _serializedEntries ??= new();
             _serializedEntries = _internal.Select(kvp => new Entry(kvp))
                     .Concat(_serializedEntries)
                     .ToList();
@@ -146,7 +147,6 @@ namespace Acciaio.Collections.Generic
         public bool Remove(KeyValuePair<TKey, TValue> item) => InternalGeneric.Remove(item);
 
         public bool TryGetValue(TKey key, out TValue value) => _internal.TryGetValue(key, out value);
-
 
         IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => _internal.GetEnumerator();
 

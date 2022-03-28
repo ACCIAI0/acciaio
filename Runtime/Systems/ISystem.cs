@@ -13,7 +13,7 @@ namespace Acciaio
 		/// Starts up the System. It's yieldable in coroutines.
 		/// </summary>
 		YieldInstruction Run();
-		
+
 		/// <summary>
 		/// Shuts down the System. It's yieldable in coroutines.
 		/// </summary>

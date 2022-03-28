@@ -12,9 +12,9 @@ namespace Acciaio
 		{
 			get
 			{
-				string scene = _scene;
+				var scene = _scene;
 #if UNITY_EDITOR
-				string editorScene = UnityEditor.EditorPrefs.GetString("Acciaio.Editor.EditingScene", null);
+				var editorScene = UnityEditor.EditorPrefs.GetString("Acciaio.Editor.EditingScene", null);
 				if (!string.IsNullOrEmpty(editorScene) && SceneManager.GetActiveScene().name != editorScene)
 					scene = editorScene;
 #endif
@@ -30,18 +30,12 @@ namespace Acciaio
 
 		public bool Equals(string s) => s == Scene;
 
-		public override bool Equals(object obj)
-		{
-			if (obj is DecoupledScene ds) return Equals(ds);
-			else if (obj is string s) return Equals(s);
-			return false;
-		}
+        public override bool Equals(object obj) => (obj is DecoupledScene ds && Equals(ds)) || (obj is string s && Equals(s));
 
-        // override object.GetHashCode
         public override int GetHashCode() => Scene.GetHashCode();
 
 		public static implicit operator string(DecoupledScene ds) => ds.Scene;
-		public static implicit operator DecoupledScene(string s) => new DecoupledScene(s);
+		public static implicit operator DecoupledScene(string s) => new(s);
 
         public static bool operator ==(DecoupledScene ds1, DecoupledScene ds2) => ds1.Equals(ds2);
         public static bool operator !=(DecoupledScene ds1, DecoupledScene ds2) => !ds1.Equals(ds2);

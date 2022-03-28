@@ -9,11 +9,11 @@ namespace Acciaio.Editor
 	public class SceneAttributeDrawer : PropertyDrawer
 	{
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => 
-				(AcciaioEditor.GetBuildSettingsScenes().Count() == 0 ? 2 : 1) * EditorGUI.GetPropertyHeight(property.propertyType, label);
+				(!AcciaioEditor.GetBuildSettingsScenes().Any() ? 2 : 1) * EditorGUI.GetPropertyHeight(property.propertyType, label);
 
 		public sealed override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
 		{
-			if (AcciaioEditor.GetBuildSettingsScenes().Count() == 0)
+			if (!AcciaioEditor.GetBuildSettingsScenes().Any())
 			{
 				EditorGUI.HelpBox(rect, "There are no applicable scenes in build order.", MessageType.Info);
 				return;
@@ -22,7 +22,7 @@ namespace Acciaio.Editor
 			var obj = property.serializedObject.targetObject;
 			var field = obj.GetType()
 					.GetField(property.name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			SceneAttribute att = field.GetCustomAttribute<SceneAttribute>();
+			var att = field.GetCustomAttribute<SceneAttribute>();
 
 			if (property.propertyType != SerializedPropertyType.String && 
 				property.propertyType != SerializedPropertyType.Integer && 
@@ -36,17 +36,15 @@ namespace Acciaio.Editor
 				property.intValue = AcciaioEditor.SceneField(rect, label, property.intValue);
 			else
 			{
-				SerializedProperty sceneProperty = property.FindPropertyRelative("_scene");
-				string value = property.propertyType == SerializedPropertyType.String ? property.stringValue :
+				var sceneProperty = property.FindPropertyRelative("_scene");
+				var value = property.propertyType == SerializedPropertyType.String ? property.stringValue :
 						sceneProperty.stringValue;
-				string newValue = AcciaioEditor.SceneField(rect, label, value, att.ShowNoneOption, att.NoneOptionLabel);
-				if (value != newValue)
-				{
-					value = att.ShowNoneOption && newValue == att.NoneOptionLabel ? null : newValue;
-					if (property.propertyType == SerializedPropertyType.String) 
-						property.stringValue = value;
-					else sceneProperty.stringValue = value;
-				}
+				var newValue = AcciaioEditor.SceneField(rect, label, value, att.ShowNoneOption, att.NoneOptionLabel);
+				if (value == newValue) return;
+				value = att.ShowNoneOption && newValue == att.NoneOptionLabel ? null : newValue;
+				if (property.propertyType == SerializedPropertyType.String) 
+					property.stringValue = value;
+				else sceneProperty.stringValue = value;
 			}
 		}		
 	}

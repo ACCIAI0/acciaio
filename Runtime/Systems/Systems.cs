@@ -27,47 +27,54 @@ namespace Acciaio
 
             public override bool keepWaiting => _keepWaiting;
 
-			public SystemOperation()
+			public SystemOperation(Action<bool> callback)
 			{
 				_op = SceneManager.LoadSceneAsync(SCENE_NAME, LoadSceneMode.Additive);
-				_op.completed += op =>
+				_op.completed += _ =>
 				{
 					var scene = SceneManager.GetSceneByName(SCENE_NAME);
 					if (!scene.IsValid())
 					{
 						Debug.LogError($"Systems scene '{SCENE_NAME}' was not loaded correctly. Maybe it wasn't added to the build order?");
+						_keepWaiting = false;
+						callback?.Invoke(false);
 						return;
 					}
 
-					List<ISystem> systems = scene.GetRootGameObjects()
+					var systems = scene.GetRootGameObjects()
 							.Select(o => o.GetComponent<ISystem>())
 							.Where(o => o != null)
 							.ToList();
-					systems.ForEach(s => Systems._systems.Add(s.GetType(), s));
-					CoroutineRunner.Start(Coroutine(systems));
+					systems.ForEach(s => _systems.Add(s.GetType(), s));
+					CoroutineRunner.Start(Coroutine(systems, callback));
 				};
 			}
 
-			private IEnumerator Coroutine(IEnumerable<ISystem> systems)
+			private IEnumerator Coroutine(IEnumerable<ISystem> systems, Action<bool> callback)
 			{
 				foreach (var s in systems)
 					yield return s.Run();
 				_keepWaiting = false;
 				Ready = true;
+				callback?.Invoke(Ready);
 			}
         }
 
-		private static readonly Dictionary<Type, ISystem> _systems = new Dictionary<Type, ISystem>();
+		private static readonly Dictionary<Type, ISystem> _systems = new();
 
 		public static bool Ready { get; private set; }
 
 		/// <summary>
 		/// Initializes the Systems architecture. To wait for the operations to complete, yield on this call in a coroutine.
 		/// </summary>
-		public static CustomYieldInstruction Load()
+		public static CustomYieldInstruction Load(Action<bool> callback = null)
 		{
-			if (Ready) return NoOp.Instance;
-			return new SystemOperation();
+			if (Ready)
+			{
+				callback?.Invoke(Ready);
+				return NoOp.Instance;
+			}
+			return new SystemOperation(callback);
 		}
 
 		/// <summary>
@@ -88,13 +95,13 @@ namespace Acciaio
 		public static bool TryGetSystem<T>(out T system) where T : ISystem
 		{
 			system = default;
-			if (!Ready) 
+			if (!Ready)
 			{
 				Debug.LogError("Systems are not Ready. Ensure Load() has been called before this.");
 				return false;
 			}
 
-			bool result = _systems.TryGetValue(typeof(T), out ISystem s);
+			var result = _systems.TryGetValue(typeof(T), out ISystem s);
 			system = (T)s;
 			return result;
 		}

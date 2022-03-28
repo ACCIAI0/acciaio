@@ -1,5 +1,4 @@
 #if !USE_NAUGHTY_ATTRIBUTES
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
@@ -10,25 +9,24 @@ namespace Acciaio.Editor
     public class Editor : UnityEditor.Editor
     {
         private const string SCRIPT_PROP_NAME = "m_Script";
-        private static readonly BindingFlags fieldsBindingFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        private const BindingFlags FIELDS_BINDING_FLAGS = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
-        private Dictionary<string, FoldoutAttribute> _cacheFolds = new Dictionary<string, FoldoutAttribute>();
-		private List<SerializedProperty> _properties = new List<SerializedProperty>();
+        private readonly Dictionary<string, FoldoutAttribute> _cacheFolds = new Dictionary<string, FoldoutAttribute>();
+		private readonly List<SerializedProperty> _properties = new List<SerializedProperty>();
 
         private void OnEnable()
         {
-            SerializedProperty p = serializedObject.GetIterator();
-            bool first = true;
-            Type type = target.GetType();
+            var p = serializedObject.GetIterator();
+            var first = true;
+            var type = target.GetType();
             while(p.NextVisible(first))
             {
                 first = false;
-                SerializedProperty property = p.Copy();
+                var property = p.Copy();
 
                 _properties.Add(property);
 
-                FoldoutAttribute attribute = type.GetField(property.name, fieldsBindingFlags)?
-                        .GetCustomAttribute<FoldoutAttribute>();
+                var attribute = type.GetField(property.name, FIELDS_BINDING_FLAGS)?.GetCustomAttribute<FoldoutAttribute>();
                 if (attribute == null) continue;
 
                 _cacheFolds.Add(property.name, attribute);
@@ -43,10 +41,10 @@ namespace Acciaio.Editor
             EditorGUI.BeginDisabledGroup(f.IsReadOnly);
             if (p.isExpanded) EditorGUILayout.PropertyField(p);
 
-            int actualCount = 0;                   
-            for (int j = 1; (f.Count < 0 || j < f.Count) && i + j < _properties.Count; j++)
+            var actualCount = 0;                   
+            for (var j = 1; (f.Count < 0 || j < f.Count) && i + j < _properties.Count; j++)
             {
-                SerializedProperty extra = _properties[i + j];
+                var extra = _properties[i + j];
                 if (_cacheFolds.ContainsKey(extra.name)) break;
                 actualCount++;
                 if (p.isExpanded) EditorGUILayout.PropertyField(extra);
@@ -72,9 +70,9 @@ namespace Acciaio.Editor
 
             serializedObject.Update();
 
-            for (int i = 1; i < _properties.Count; i++)
+            for (var i = 1; i < _properties.Count; i++)
             {
-                SerializedProperty p = _properties[i];
+                var p = _properties[i];
                 if (_cacheFolds.TryGetValue(p.name, out FoldoutAttribute f)) 
                     i += DrawFoldout(i, p, f);
                 else EditorGUILayout.PropertyField(p);

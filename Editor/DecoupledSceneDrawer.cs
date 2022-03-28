@@ -13,17 +13,17 @@ namespace Acciaio.Editor
 
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
 		{
-			SerializedProperty scene = property.FindPropertyRelative("_scene");
+			var scene = property.FindPropertyRelative("_scene");
 
-			bool isPresent = EditorBuildSettings.scenes
+			var isPresent = EditorBuildSettings.scenes
 					.Where(s => s.enabled)
 					.Select(s => System.IO.Path.GetFileNameWithoutExtension(s.path))
 					.Any(name => scene.stringValue == name);
 
-			GUIStyle style = new GUIStyle(EditorStyles.textField);
-			Color defaultNormal = EditorStyles.label.normal.textColor;
-			Color defaultHover = EditorStyles.label.hover.textColor;
-			Color defaultFocus = EditorStyles.label.focused.textColor;
+			var style = new GUIStyle(EditorStyles.textField);
+			var defaultNormal = EditorStyles.label.normal.textColor;
+			var defaultHover = EditorStyles.label.hover.textColor;
+			var defaultFocus = EditorStyles.label.focused.textColor;
 			if (!isPresent) 
 			{
 				EditorStyles.label.normal.textColor = Color.yellow;
@@ -32,8 +32,10 @@ namespace Acciaio.Editor
 				label.tooltip = $"'{scene.stringValue}' is not in the build order";
 			}
 
-			Rect singleRect = new Rect(rect);
-			singleRect.height = EditorGUIUtility.singleLineHeight;
+			var singleRect = new Rect(rect)
+			{
+				height = EditorGUIUtility.singleLineHeight
+			};
 			scene.stringValue = EditorGUI.TextField(singleRect, label, scene.stringValue);
 
 			EditorStyles.label.normal.textColor = defaultNormal;

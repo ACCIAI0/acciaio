@@ -10,7 +10,7 @@ namespace Acciaio
 		private IEnumerator InternalRun()
 		{
 			yield return StartCoroutine(RunRoutine());
-			if (!IsRunning) 
+			if (!IsRunning)
 				Debug.LogWarning($"{GetType().Name}.Run() was called but IsRunning is still false.");
 		}
 
@@ -32,24 +32,23 @@ namespace Acciaio
         protected override void OnDestroyOverride() { }
 
 		/// <summary>
-		/// Override to add your initialization logic in form of a Coroutine. 
+		/// Override to add your initialization logic in form of a Coroutine.
 		/// If the method ends with success, it make sure IsRunning will return true.
 		/// </summary>
 		protected abstract IEnumerator RunRoutine();
 
 		/// <summary>
-		/// Override to add your shutdown logic in form of a Coroutine. 
+		/// Override to add your shutdown logic in form of a Coroutine.
 		/// It should always make sure IsRunning will return false after a call to Shutdown().
 		/// </summary>
 		protected abstract IEnumerator ShutdownRoutine();
 
-		
 		public YieldInstruction Run()
 		{
 			enabled = true;
 			return StartCoroutine(InternalRun());
 		}
-		
+
 		public YieldInstruction Shutdown()
 		{
 			enabled = true;

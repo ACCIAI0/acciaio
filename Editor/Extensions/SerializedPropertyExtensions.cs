@@ -15,20 +15,20 @@ namespace Acciaio.Editor
 
         private static object GetObject(SerializedProperty property, bool stopAtParent)
         {
-            SerializedObject sObj = property.serializedObject;
+            var sObj = property.serializedObject;
             sObj.ApplyModifiedProperties();
             object @object = sObj.targetObject;
 
-            string[] elements = property.propertyPath.Split('.');
-            for (int i = 0; i < elements.Length - Convert.ToInt32(stopAtParent); i++)
+            var elements = property.propertyPath.Split('.');
+            for (var i = 0; i < elements.Length - Convert.ToInt32(stopAtParent); i++)
             {
-                string pathElement = elements[i];
+                var pathElement = elements[i];
 
                 if (pathElement == PATH_ELEMENT_ARRAY)
                 {
-                    int index = int.Parse(elements[i + 1].Replace("data[", "").Replace("]", ""));
-                    int j = -1;
-                    IEnumerator enumerator = (@object as IEnumerable).GetEnumerator();
+                    var index = int.Parse(elements[i + 1].Replace("data[", "").Replace("]", ""));
+                    var j = -1;
+                    var enumerator = ((IEnumerable)@object).GetEnumerator();
                     while(j < index && enumerator.MoveNext()) j++;
                     if (j == index) @object = enumerator.Current;
                     else 
@@ -71,7 +71,7 @@ namespace Acciaio.Editor
 
         public static T GetValue<T>(this SerializedProperty property)
         {
-            object @object = GetObject(property, false);
+            var @object = GetObject(property, false);
             if (@object.GetType() == typeof(T)) return (T)@object;
             Debug.LogError($"{property.name} is not a valid {typeof(T).Name}");
             return default(T);
@@ -88,16 +88,16 @@ namespace Acciaio.Editor
 					property.boolValue = false;
 					break;
 				case SerializedPropertyType.Bounds: 
-					property.boundsValue = default(Bounds);
+					property.boundsValue = default;
 					break;
 				case SerializedPropertyType.BoundsInt: 
-					property.boundsIntValue = default(BoundsInt);
+					property.boundsIntValue = default;
 					break;
 				case SerializedPropertyType.Character: 
 					property.stringValue = "" + default(char);
 					break;
 				case SerializedPropertyType.Color: 
-					property.colorValue = default(Color);
+					property.colorValue = default;
 					break;
 				case SerializedPropertyType.Enum: 
 					property.enumValueIndex = 0;
@@ -106,12 +106,12 @@ namespace Acciaio.Editor
                     property.exposedReferenceValue = null;
                     break;
 				case SerializedPropertyType.FixedBufferSize:
-					throw new System.InvalidOperationException("FixedBufferSize value cannot be set");
+					throw new InvalidOperationException("FixedBufferSize value cannot be set");
 				case SerializedPropertyType.Float:
 					property.floatValue = 0;
 					break;
 				case SerializedPropertyType.Gradient:
-					property.SetGradientValue(default(Gradient));
+					property.SetGradientValue(default);
 					break;
 				case SerializedPropertyType.Integer: 
 				case SerializedPropertyType.LayerMask: 
@@ -121,32 +121,35 @@ namespace Acciaio.Editor
                     property.managedReferenceValue = null;
                     break;
 				case SerializedPropertyType.Quaternion: 
-					property.quaternionValue = default(Quaternion);
+					property.quaternionValue = default;
 					break;
 				case SerializedPropertyType.Rect: 
-					property.rectValue = default(Rect);
+					property.rectValue = default;
 					break;
 				case SerializedPropertyType.RectInt: 
-					property.rectIntValue = default(RectInt);
+					property.rectIntValue = default;
 					break;
 				case SerializedPropertyType.String:
 					property.stringValue = "";
 					break;
 				case SerializedPropertyType.Vector2: 
-					property.vector2Value = default(Vector2);
+					property.vector2Value = default;
 					break;
 				case SerializedPropertyType.Vector2Int: 
-					property.vector2IntValue = default(Vector2Int);
+					property.vector2IntValue = default;
 					break;
 				case SerializedPropertyType.Vector3: 
-					property.vector3Value = default(Vector3);
+					property.vector3Value = default;
 					break;
 				case SerializedPropertyType.Vector3Int: 
-					property.vector3IntValue = default(Vector3Int);
+					property.vector3IntValue = default;
 					break;
 				case SerializedPropertyType.Vector4: 
-					property.vector4Value = default(Vector4);
+					property.vector4Value = default;
 					break;
+				case SerializedPropertyType.Generic:
+				case SerializedPropertyType.ObjectReference:
+				case SerializedPropertyType.AnimationCurve:
 				default:
 					property.objectReferenceValue = null;
 					break;

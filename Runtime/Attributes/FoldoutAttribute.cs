@@ -31,7 +31,7 @@ namespace Acciaio
 
         /// <summary>
         /// Creates a Foldout that includes all the following fields up to the end or to the next Foldout.
-        /// Setting it as read-only disables all fields in the Foldout. If isBoxed is true the fields in the 
+        /// Setting it as read-only disables all fields in the Foldout. If isBoxed is true the fields in the
         /// Foldout will be enclosed in a GroupBox.
         /// </summary>
         public FoldoutAttribute(string name, bool isReadonly, bool isBoxed) : this (name, 0, isReadonly, isBoxed) => Count = -1;
@@ -49,7 +49,7 @@ namespace Acciaio
 
         /// <summary>
         /// Creates a Foldout that includes the following count fields or up to the end or to the next Foldout.
-        /// Setting it as read-only disables all fields in the Foldout. If isBoxed is true the fields in the 
+        /// Setting it as read-only disables all fields in the Foldout. If isBoxed is true the fields in the
         /// Foldout will be enclosed in a GroupBox.
         /// </summary>
         public FoldoutAttribute(string name, ushort count, bool isReadonly, bool isBoxed)

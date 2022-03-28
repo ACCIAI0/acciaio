@@ -1,3 +1,5 @@
+#pragma warning disable RCS1158
+
 using UnityEngine;
 
 namespace Acciaio
@@ -5,22 +7,21 @@ namespace Acciaio
 	[DisallowMultipleComponent]
 	public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
 	{
-		private static bool systemIsShuttingDown = false;
-		
-		public static T Instance { get; private set; } = null;
+		private static bool systemIsShuttingDown;
 
+		public static T Instance { get; private set; }
 		public static bool Exists => Instance != null;
 
 		[SerializeField]
-		private bool _preventReplacement = false;
+		private bool _preventReplacement;
 		[SerializeField]
-		private bool _dontDestroyOnLoad = false;
+		private bool _dontDestroyOnLoad;
 
-		private bool _isBeingReplaced = false;
+		private bool _isBeingReplaced;
 
-		private void Awake() 
+		protected void Awake()
 		{
-			if (Instance != null && Instance != this) 
+			if (Instance != null && Instance != this)
 			{
 				if (Instance._preventReplacement)
 				{
@@ -47,7 +48,7 @@ namespace Acciaio
 			AwakeOverride();
 		}
 
-		private void OnDestroy()
+		protected void OnDestroy()
 		{
 			if (Instance == this) Instance = null;
 			systemIsShuttingDown = !_isBeingReplaced;
@@ -68,3 +69,4 @@ namespace Acciaio
 		protected abstract void OnDestroyOverride();
 	}
 }
+#pragma warning restore RCS1158

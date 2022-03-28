@@ -16,7 +16,7 @@ namespace Acciaio
     {
 		public sealed class SceneOperation : CustomYieldInstruction
 		{
-			private static SceneOperation Create(ScenesSystem system, IEnumerator routine) => new SceneOperation(system, routine);
+			private static SceneOperation Create(ScenesSystem system, IEnumerator routine) => new(system, routine);
 
 			public static void PrepareType() => createOperation = Create;
 
@@ -57,8 +57,8 @@ namespace Acciaio
 		private SceneInstance _loadedAddressablesScene = default;
 #endif
 		
-		private bool _isRunning = false;
-		private SceneOperation _operation = null;
+		private bool _isRunning;
+		private SceneOperation _operation;
 
         public override bool IsRunning => _isRunning;
 
@@ -68,10 +68,9 @@ namespace Acciaio
 
 			if (string.IsNullOrEmpty(loadingScene)) loadingScene = _defaultLoadingScene;
 
-			
 			if (!string.IsNullOrEmpty(loadingScene))
 				yield return SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
-			
+
 			Scene loading = !string.IsNullOrEmpty(loadingScene) ? SceneManager.GetSceneByName(loadingScene) : new Scene();
 			ILoadingView view = null;
 			if (loading.IsValid())

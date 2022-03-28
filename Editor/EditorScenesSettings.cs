@@ -2,6 +2,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Acciaio.Editor
 {
@@ -12,7 +13,7 @@ namespace Acciaio.Editor
 		/// <summary>
 		/// Editor Prefs key for retrieving the scene that is currently being edited.
 		/// </summary>
-		public const string EDITING_SCENE_PREFS_KEY = "Acciaio.Editor.EditingScene";
+		private const string EDITING_SCENE_PREFS_KEY = "Acciaio.Editor.EditingScene";
 
 		private static EditorScenesSettings _instance;
 
@@ -22,7 +23,7 @@ namespace Acciaio.Editor
 			{
 				if (_instance == null)
 				{
-					string[] assets = AssetDatabase.FindAssets($"t:{nameof(EditorScenesSettings)}");
+					var assets = AssetDatabase.FindAssets($"t:{nameof(EditorScenesSettings)}");
 					if (assets.Length == 0) return null;
 					if (assets.Length > 1)
 						Debug.LogWarning("Multiple Editor Scenes Setups found, only one will be used.");
@@ -39,7 +40,7 @@ namespace Acciaio.Editor
 			SceneAsset asset = null;
 			if (!string.IsNullOrEmpty(scene))
 			{
-				string path = EditorBuildSettings.scenes.FirstOrDefault(s => s.path.EndsWith($"{scene}.unity"))?.path;
+				var path = EditorBuildSettings.scenes.FirstOrDefault(s => s.path.EndsWith($"{scene}.unity"))?.path;
 				if (path == null)
 					Debug.LogError($"Scene {scene} is not present in build settings.");
 				else asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
@@ -59,7 +60,7 @@ namespace Acciaio.Editor
 					EditorApplication.isPlaying = false;
 					return;
 				}
-				EditorPrefs.SetString(EDITING_SCENE_PREFS_KEY, EditorSceneManager.GetActiveScene().name);
+				EditorPrefs.SetString(EDITING_SCENE_PREFS_KEY, SceneManager.GetActiveScene().name);
 			}
 			else if (change == PlayModeStateChange.EnteredEditMode) EditorPrefs.DeleteKey(EDITING_SCENE_PREFS_KEY);
 		}

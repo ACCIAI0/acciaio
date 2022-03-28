@@ -6,8 +6,8 @@ namespace Acciaio.Editor
 	[CustomEditor(typeof(EditorScenesSettings))]
 	public class EditorScenesSettingsEditor : UnityEditor.Editor
 	{
-		private SerializedProperty _startupScene = null;
-		private SerializedProperty _isActive = null;
+		private SerializedProperty _startupScene;
+		private SerializedProperty _isActive;
 
 		private void OnEnable()
 		{

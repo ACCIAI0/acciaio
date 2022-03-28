@@ -7,11 +7,11 @@ namespace Acciaio
 	{
 		private class StaticCoroutineRunner : MonoBehaviour { }
 
-		private static StaticCoroutineRunner _runner = null;
+		private static StaticCoroutineRunner _runner;
 
 		public static Coroutine Start(IEnumerator routine)
 		{
-			if (_runner == null) 
+			if (_runner == null)
 			{
 				_runner = new GameObject($"[{typeof(CoroutineRunner)}]").AddComponent<StaticCoroutineRunner>();
 				Object.DontDestroyOnLoad(_runner.gameObject);

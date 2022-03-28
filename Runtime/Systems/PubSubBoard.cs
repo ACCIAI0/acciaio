@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Acciaio
 {
     ///<summary>
-    ///The PubSubBoard, as that unexpectedly funny sounding name suggests, is the 
+    ///The PubSubBoard, as that unexpectedly funny sounding name suggests, is the
     ///main Hub which event publishers and events subscribers refer to. Here, subscribers
     ///can subscribe for certain events by specifying their name and - if any - their
     ///arguments type. Publishers can trigger events by name and let the Hub notify all
@@ -16,8 +16,7 @@ namespace Acciaio
     {
         private static readonly Type VOID_TYPE = typeof(void);
 
-        private readonly Dictionary<string, List<object>> _subscribersByType = 
-                new Dictionary<string, List<object>>();
+        private readonly Dictionary<string, List<object>> _subscribersByType = new();
 
         private string BuildKey(string eventName, Type type)
         {
@@ -32,8 +31,7 @@ namespace Acciaio
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException("Cannot accept null subscriptions");
-            List<object> subs;
-            if (!_subscribersByType.TryGetValue(key, out subs))
+            if (!_subscribersByType.TryGetValue(key, out List<object> subs))
             {
                 subs = new List<object>();
                 _subscribersByType.Add(key, subs);
@@ -45,8 +43,7 @@ namespace Acciaio
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException("Cannot unsubscribe null subscriptions");
-            List<object> subs;
-            if (!_subscribersByType.TryGetValue(key, out subs))
+            if (!_subscribersByType.TryGetValue(key, out List<object> subs))
                 return false;
             return subs.Remove(subscriptionAsObject);
         }
@@ -61,25 +58,25 @@ namespace Acciaio
         ///<summary>
         ///Subscribes to the event of name eventName with the given callback.
         ///</summary>
-        public void Subscribe<T>(string eventName, Action<T> subscription) => 
+        public void Subscribe<T>(string eventName, Action<T> subscription) =>
                 Subscribe(BuildKey(eventName, typeof(T)), (object)subscription);
 
         ///<summary>
         ///Subscribes to the event of name eventName with the given callback with no arguments.
         ///</summary>
-        public void Subscribe(string eventName, Action subscription) => 
+        public void Subscribe(string eventName, Action subscription) =>
                 Subscribe(BuildKey(eventName, VOID_TYPE), (object)subscription);
 
         ///<summary>
         ///Removes a subscription to the event of name eventName.
         ///</summary>
-        public bool Unsubscribe<T>(string eventName, Action<T> subscription) => 
+        public bool Unsubscribe<T>(string eventName, Action<T> subscription) =>
                 Unsubscribe(BuildKey(eventName, typeof(T)), (object)subscription);
-        
+
         ///<summary>
         ///Removes a subscription to the event of name eventName.
         ///</summary>
-        public void Unsubscribe(string eventName, Action subscription) => 
+        public void Unsubscribe(string eventName, Action subscription) =>
                 Unsubscribe(BuildKey(eventName, VOID_TYPE), (object)subscription);
 
         ///<summary>
