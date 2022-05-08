@@ -15,7 +15,7 @@ namespace Acciaio.Collections.Generic
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     [Serializable]
-    public class Map<TKey, TValue> : IDictionary, ISerializationCallbackReceiver, IDictionary<TKey, TValue>
+    public class Map<TKey, TValue> : IDictionary, IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
         [Serializable]
         private struct Entry
@@ -57,9 +57,9 @@ namespace Acciaio.Collections.Generic
 
         public bool IsReadOnly => InternalIDict.IsReadOnly;
 
-        public ICollection Keys => InternalIDict.Keys;
+        public ICollection<TKey> Keys => InternalGeneric.Keys;
 
-        public ICollection Values => InternalIDict.Values;
+        public ICollection<TValue> Values => InternalGeneric.Values;
 
         public int Count => _internal.Count;
 
@@ -67,9 +67,9 @@ namespace Acciaio.Collections.Generic
 
         public object SyncRoot => InternalIDict.SyncRoot;
 
-        ICollection<TKey> IDictionary<TKey, TValue>.Keys => _internal.Keys;
+        ICollection IDictionary.Keys => InternalIDict.Keys;
 
-        ICollection<TValue> IDictionary<TKey, TValue>.Values => _internal.Values;
+        ICollection IDictionary.Values => InternalIDict.Values;
 
         public Map() =>
                 _internal = new Dictionary<TKey, TValue>();
@@ -99,7 +99,7 @@ namespace Acciaio.Collections.Generic
             for(int i = 0, check = 0; i < elementsNumber; i++)
             {
                 var entry = _serializedEntries[check];
-                if (_internal.ContainsKey(entry.Key))
+                if (entry.Key == null || _internal.ContainsKey(entry.Key))
                 {
                     check++;
                 }
@@ -130,8 +130,6 @@ namespace Acciaio.Collections.Generic
 
         public void Remove(object key) => InternalIDict.Remove(key);
 
-        public IDictionaryEnumerator GetEnumerator() => InternalIDict.GetEnumerator();
-
         public void Add(TKey key, TValue value) => _internal.Add(key, value);
 
         public void Add(KeyValuePair<TKey, TValue> item) => InternalGeneric.Add(item);
@@ -148,7 +146,9 @@ namespace Acciaio.Collections.Generic
 
         public bool TryGetValue(TKey key, out TValue value) => _internal.TryGetValue(key, out value);
 
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => _internal.GetEnumerator();
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _internal.GetEnumerator();
+
+        IDictionaryEnumerator IDictionary.GetEnumerator() => InternalIDict.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
