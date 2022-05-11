@@ -29,11 +29,33 @@ namespace Acciaio.Collections.Generic
                 Value = kvp.Value;
             }
 
+            public bool Equals(Entry e) => 
+                Key.Equals(e.Key) && Value.Equals(e.Value);
+
+            public bool Equals(KeyValuePair<TKey, TValue> kvp) => 
+                Key.Equals(kvp.Key) && Value.Equals(kvp.Value);
+
+            public override bool Equals(object obj)
+            {
+                return obj is Entry e && Equals(e) ||
+                        obj is KeyValuePair<TKey, TValue> kvp && Equals(kvp);
+            }
+
+            public override int GetHashCode() => Key.GetHashCode();
+
             public static implicit operator KeyValuePair<TKey, TValue>(Entry entry) => new(entry.Key, entry.Value);
             public static implicit operator Entry(KeyValuePair<TKey, TValue> pair) => new(pair);
+
+            public static bool operator ==(Entry e1, Entry e2) => e1.Equals(e2);
+            public static bool operator !=(Entry e1, Entry e2) => !(e1 == e2);
+            public static bool operator ==(Entry e, KeyValuePair<TKey, TValue> kvp) => e.Equals(kvp);
+            public static bool operator !=(Entry e, KeyValuePair<TKey, TValue> kvp) => !(e == kvp);
+            public static bool operator ==(KeyValuePair<TKey, TValue> kvp, Entry e) => e.Equals(kvp);
+            public static bool operator !=(KeyValuePair<TKey, TValue> kvp, Entry e) => !(e == kvp);
         }
 
         private readonly Dictionary<TKey, TValue> _internal;
+        private readonly List<Entry> _serializationMiddleman = new();
 
         [SerializeField]
         private List<Entry> _serializedEntries;
@@ -94,11 +116,13 @@ namespace Acciaio.Collections.Generic
         public void OnAfterDeserialize()
         {
             _internal.Clear();
+            _serializationMiddleman.Clear();
+            _serializationMiddleman.AddRange(_serializedEntries);
             var iDict = _internal as IDictionary<TKey, TValue>;
             var elementsNumber = _serializedEntries.Count;
             for(int i = 0, check = 0; i < elementsNumber; i++)
             {
-                var entry = _serializedEntries[check];
+                var entry = _serializationMiddleman[check];
                 if (entry.Key == null || _internal.ContainsKey(entry.Key))
                 {
                     check++;
@@ -106,7 +130,7 @@ namespace Acciaio.Collections.Generic
                 else
                 {
                     iDict.Add(entry);
-                    _serializedEntries.RemoveAt(check);
+                    _serializationMiddleman.RemoveAt(check);
                 }
             }
         }
@@ -114,10 +138,10 @@ namespace Acciaio.Collections.Generic
         public void OnBeforeSerialize()
         {
             _serializedEntries ??= new();
+            _serializedEntries.Clear();
             _serializedEntries = _internal.Select(kvp => new Entry(kvp))
-                    .Concat(_serializedEntries)
+                    .Concat(_serializationMiddleman)
                     .ToList();
-            _internal.Clear();
         }
 
         public void Add(object key, object value) => InternalIDict.Add(key, value);

@@ -72,9 +72,9 @@ namespace Acciaio.Editor
         public static T GetValue<T>(this SerializedProperty property)
         {
             var @object = GetObject(property, false);
-            if (@object.GetType() == typeof(T)) return (T)@object;
+            if (typeof(T).IsAssignableFrom(@object.GetType())) return (T)@object;
             Debug.LogError($"{property.name} is not a valid {typeof(T).Name}");
-            return default(T);
+            return default;
         }
 
         public static void SetToDefault(this SerializedProperty property)

@@ -97,6 +97,8 @@ namespace Acciaio.Collections.Generic.Editor
         {
             var serializedEntries = property.FindPropertyRelative(LIST_NAME);
             RetrieveList(serializedEntries, label).DoList(position);
+
+            property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
