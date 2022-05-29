@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -53,7 +54,7 @@ namespace Acciaio
 
 
 #if USE_ADDRESSABLES
-		private readonly Dictionary<string, SceneInstance> _addedAddressablesScenes = new Dictionary<string, SceneInstance>();
+		private readonly Dictionary<string, SceneInstance> _addedAddressablesScenes = new();
 		private SceneInstance _loadedAddressablesScene = default;
 #endif
 		

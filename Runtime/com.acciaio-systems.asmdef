@@ -1,7 +1,10 @@
 {
     "name": "Acciaio",
     "rootNamespace": "Acciaio",
-    "references": [],
+    "references": [
+        "Unity.Addressables",
+        "Unity.ResourceManager"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
