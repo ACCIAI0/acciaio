@@ -7,17 +7,17 @@ namespace Acciaio
         /// <summary>
         /// Given the current Vector (x, y, z), it returns (x, 0, 0)
         /// </summary>
-        public static Vector3 x(this Vector3 vector) => new(vector.x, 0, 0);
+        public static Vector3 right(this Vector3 vector) => new(vector.x, 0, 0);
 
         /// <summary>
         /// Given the current Vector (x, y, z), it returns (0, y, 0)
         /// </summary>
-        public static Vector3 y(this Vector3 vector) => new(0, vector.y, 0);
+        public static Vector3 up(this Vector3 vector) => new(0, vector.y, 0);
 
         /// <summary>
         /// Given the current Vector (x, y, z), it returns (0, 0, z)
         /// </summary>
-        public static Vector3 z(this Vector3 vector) => new(0, 0, vector.z);
+        public static Vector3 forward(this Vector3 vector) => new(0, 0, vector.z);
 
         /// <summary>
         /// Sizzling operator. Give the Vector (x, y, z), it returns (x, x)
