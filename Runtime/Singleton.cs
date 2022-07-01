@@ -17,8 +17,6 @@ namespace Acciaio
 		[SerializeField]
 		private bool _dontDestroyOnLoad;
 
-		private bool _isBeingReplaced;
-
 		protected void Awake()
 		{
 			if (Instance != null && Instance != this)
@@ -31,14 +29,7 @@ namespace Acciaio
 				}
 
 				Debug.LogWarning("Replacing an Instance of Singleton " + GetType().Name);
-				Instance._isBeingReplaced = true;
 				Destroy(Instance.gameObject);
-			}
-
-			if (systemIsShuttingDown)
-			{
-				Destroy(gameObject);
-				return;
 			}
 
 			if (_dontDestroyOnLoad) DontDestroyOnLoad(gameObject);
@@ -51,8 +42,6 @@ namespace Acciaio
 		protected void OnDestroy()
 		{
 			if (Instance == this) Instance = null;
-			systemIsShuttingDown = !_isBeingReplaced;
-
 			OnDestroyOverride();
 		}
 
