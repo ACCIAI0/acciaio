@@ -9,8 +9,8 @@ namespace Acciaio.Editor
 	{
 		private static string[] BuildScenesListForField(bool allowEmpty, string emptyLabel)
 		{
-			var scenesList = Enumerable.Empty<string>();
-			if (allowEmpty) scenesList = Enumerable.Repeat(emptyLabel ?? "-", 1);
+			var scenesList = System.Linq.Enumerable.Empty<string>();
+			if (allowEmpty) scenesList = System.Linq.Enumerable.Repeat(emptyLabel ?? "-", 1);
 			return scenesList.Concat(GetBuildSettingsScenes()).ToArray();
 		}
 

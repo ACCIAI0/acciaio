@@ -61,7 +61,7 @@ namespace Acciaio.Editor
 
             if (EditorBuildSettings.scenes.All(s => s.path != systemsScenePath))
             {
-                var scenes = Enumerable.Repeat(new EditorBuildSettingsScene(systemsScenePath, true), 1)
+                var scenes = System.Linq.Enumerable.Repeat(new EditorBuildSettingsScene(systemsScenePath, true), 1)
                         .Concat(EditorBuildSettings.scenes)
                         .ToArray();
                 EditorBuildSettings.scenes = scenes;

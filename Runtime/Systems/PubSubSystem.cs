@@ -25,10 +25,16 @@ namespace Acciaio
 		public void Subscribe<T>(string eventName, Action<T> subscription) =>
 				_globalBoard.Subscribe(eventName, subscription);
 
+		public void Subscribe<T>(string eventName, RefAction<T> subscription) =>
+				_globalBoard.Subscribe(eventName, subscription);
+
         public void Subscribe(string eventName, Action subscription) =>
 				_globalBoard.Subscribe(eventName, subscription);
 
         public bool Unsubscribe<T>(string eventName, Action<T> subscription) =>
+				_globalBoard.Unsubscribe(eventName, subscription);
+
+		public bool Unsubscribe<T>(string eventName, RefAction<T> subscription) =>
 				_globalBoard.Unsubscribe(eventName, subscription);
 
         public void Unsubscribe(string eventName, Action subscription) =>
@@ -44,6 +50,16 @@ namespace Acciaio
 			_globalBoard.Trigger(eventName, args);
 		}
 
+		public void Trigger<T>(string eventName, ref T args)
+		{
+			if (!IsRunning)
+			{
+				Debug.LogError($"[Pub-Sub System] System shut down, won't trigger the event '{eventName}'.");
+				return;
+			}
+			_globalBoard.Trigger(eventName, ref args);
+		}
+
         public void Trigger(string eventName)
 		{
 			if (!IsRunning)
@@ -57,10 +73,16 @@ namespace Acciaio
 		public void Subscribe<T>(string board, string eventName, Action<T> subscription) =>
 				GetOrCreate(board).Subscribe(eventName, subscription);
 
+		public void Subscribe<T>(string board, string eventName, RefAction<T> subscription) =>
+				GetOrCreate(board).Subscribe(eventName, subscription);
+
         public void Subscribe(string board, string eventName, Action subscription) =>
 				GetOrCreate(board).Subscribe(eventName, subscription);
 
         public bool Unsubscribe<T>(string board, string eventName, Action<T> subscription) =>
+				GetOrCreate(board).Unsubscribe(eventName, subscription);
+
+		public bool Unsubscribe<T>(string board, string eventName, RefAction<T> subscription) =>
 				GetOrCreate(board).Unsubscribe(eventName, subscription);
 
         public void Unsubscribe(string board, string eventName, Action subscription) =>
@@ -74,6 +96,16 @@ namespace Acciaio
 				return;
 			}
 			GetOrCreate(board).Trigger(eventName, args);
+		}
+
+		public void Trigger<T>(string board, string eventName, ref T args)
+		{
+			if (!IsRunning)
+			{
+				Debug.LogError($"[Pub-Sub System] System shut down, won't trigger the event '{eventName}'.");
+				return;
+			}
+			GetOrCreate(board).Trigger(eventName, ref args);
 		}
 
         public void Trigger(string board, string eventName)
