@@ -38,22 +38,11 @@ namespace Acciaio.Collections.Generic.Editor
             return found;
         }
 
-        private MapKeyValue GetAttribute()
-        {
-            var key = fieldInfo.GetCustomAttribute<MapKey>();
-            var value = fieldInfo.GetCustomAttribute<MapValue>();
-            var keyValue = fieldInfo.GetCustomAttribute<MapKeyValue>();
-
-            if (keyValue == null && (key != null || value != null))
-                keyValue = new MapKeyValue(key, value);
-            return keyValue;
-        }
-
         private ReorderableList RetrieveList(SerializedProperty property, GUIContent label)
         {
             if (_list != null) return _list;
 
-            var keyValue = GetAttribute();
+            var names = fieldInfo.GetCustomAttribute<MapNames>();
             _list = new ReorderableList(property.serializedObject, property, true, true, true, true)
             {
                 drawHeaderCallback = rect => EditorGUI.LabelField(rect, label),
@@ -71,7 +60,7 @@ namespace Acciaio.Collections.Generic.Editor
                     var key = entry.FindPropertyRelative(KEY_NAME);
                     var value = entry.FindPropertyRelative(VALUE_NAME);
 
-                    string keyName = keyValue?.KeyName ?? KEY_NAME;
+                    string keyName = names?.KeyName ?? KEY_NAME;
                     string keyTooltip = "";
 
                     bool isNullKey = key.propertyType == SerializedPropertyType.ObjectReference && key.objectReferenceValue == null;
@@ -92,7 +81,7 @@ namespace Acciaio.Collections.Generic.Editor
 
                     var valueRect = new Rect(rect.x, keyRect.y + keyRect.height, rect.width,
                         EditorGUI.GetPropertyHeight(value, true));
-                    EditorGUI.PropertyField(valueRect, value, new GUIContent(keyValue?.ValueName ?? VALUE_NAME));
+                    EditorGUI.PropertyField(valueRect, value, new GUIContent(names?.ValueName ?? VALUE_NAME));
                 },
                 onAddCallback = list =>
                 {
