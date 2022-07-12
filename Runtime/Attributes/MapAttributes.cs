@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Acciaio
+namespace Acciaio.Collections.Generic
 {
     public class MapNames : PropertyAttribute
     {

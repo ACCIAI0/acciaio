@@ -76,12 +76,12 @@ namespace Acciaio.Collections.Generic.Editor
 
                     var keyRect = new Rect(rect.x, rect.y + MARGIN, rect.width, EditorGUI.GetPropertyHeight(key, true));
                     EditorStyles.label.richText = true;
-                    EditorGUI.PropertyField(keyRect, key, new GUIContent(keyName, keyTooltip));
+                    EditorGUI.PropertyField(keyRect, key, new GUIContent(keyName, keyTooltip), true);
                     EditorStyles.label.richText = false;
 
                     var valueRect = new Rect(rect.x, keyRect.y + keyRect.height, rect.width,
                         EditorGUI.GetPropertyHeight(value, true));
-                    EditorGUI.PropertyField(valueRect, value, new GUIContent(names?.ValueName ?? MapNames.DEFAULT_VALUE));
+                    EditorGUI.PropertyField(valueRect, value, new GUIContent(names?.ValueName ?? MapNames.DEFAULT_VALUE), true);
                 },
                 onAddCallback = list =>
                 {
