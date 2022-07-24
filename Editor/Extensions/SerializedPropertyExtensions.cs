@@ -40,11 +40,14 @@ namespace Acciaio.Editor
                 }
                 else
                 {
-					Debug.LogError(pathElement + $" {@object.GetType()}" + @object.GetType()
-                        .GetField(pathElement, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
-                    @object = @object.GetType()
-                        .GetField(pathElement, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                        .GetValue(@object);
+					Type type = @object.GetType();
+					FieldInfo field = null;
+					do
+					{
+						field = type.GetField(pathElement, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+						if (field == null) type = type.BaseType;
+					} while (field == null && type != typeof(object));
+                    @object = field?.GetValue(@object);
                 }
             }
             return @object;
