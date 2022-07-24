@@ -40,7 +40,7 @@ namespace Acciaio.Editor
                 }
                 else
                 {
-					Debug.LogError(@object.GetType()
+					Debug.LogError(pathElement + $" {@object.GetType()}" + @object.GetType()
                         .GetField(pathElement, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance));
                     @object = @object.GetType()
                         .GetField(pathElement, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
