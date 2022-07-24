@@ -7,12 +7,13 @@ namespace Acciaio
 {
     public class PubSubSystem : BaseSystem<PubSubSystem>
     {
-		private readonly PubSubBoard _globalBoard = new();
 		private readonly Dictionary<string, PubSubBoard> _boards = new();
 
 		private bool _isRunning;
 
         public override bool IsRunning => _isRunning;
+
+		public PubSubBoard Global { get; } = new();
 
 		public PubSubBoard this[string boardName] => GetOrCreate(boardName);
 
@@ -23,22 +24,22 @@ namespace Acciaio
 		}
 
 		public void Subscribe<T>(string eventName, Action<T> subscription) =>
-				_globalBoard.Subscribe(eventName, subscription);
+				Global.Subscribe(eventName, subscription);
 
 		public void Subscribe<T>(string eventName, RefAction<T> subscription) =>
-				_globalBoard.Subscribe(eventName, subscription);
+				Global.Subscribe(eventName, subscription);
 
         public void Subscribe(string eventName, Action subscription) =>
-				_globalBoard.Subscribe(eventName, subscription);
+				Global.Subscribe(eventName, subscription);
 
         public bool Unsubscribe<T>(string eventName, Action<T> subscription) =>
-				_globalBoard.Unsubscribe(eventName, subscription);
+				Global.Unsubscribe(eventName, subscription);
 
 		public bool Unsubscribe<T>(string eventName, RefAction<T> subscription) =>
-				_globalBoard.Unsubscribe(eventName, subscription);
+				Global.Unsubscribe(eventName, subscription);
 
         public void Unsubscribe(string eventName, Action subscription) =>
-				_globalBoard.Unsubscribe(eventName, subscription);
+				Global.Unsubscribe(eventName, subscription);
 
         public void Trigger<T>(string eventName, T args)
 		{
@@ -47,7 +48,7 @@ namespace Acciaio
 				Debug.LogError($"[Pub-Sub System] System shut down, won't trigger the event '{eventName}'.");
 				return;
 			}
-			_globalBoard.Trigger(eventName, args);
+			Global.Trigger(eventName, args);
 		}
 
 		public void Trigger<T>(string eventName, ref T args)
@@ -57,7 +58,7 @@ namespace Acciaio
 				Debug.LogError($"[Pub-Sub System] System shut down, won't trigger the event '{eventName}'.");
 				return;
 			}
-			_globalBoard.Trigger(eventName, ref args);
+			Global.Trigger(eventName, ref args);
 		}
 
         public void Trigger(string eventName)
@@ -67,7 +68,7 @@ namespace Acciaio
 				Debug.LogError($"[Pub-Sub System] System shut down, won't trigger the event '{eventName}'.");
 				return;
 			}
-			_globalBoard.Trigger(eventName);
+			Global.Trigger(eventName);
 		}
 
 		public void Subscribe<T>(string board, string eventName, Action<T> subscription) =>
