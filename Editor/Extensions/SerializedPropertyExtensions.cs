@@ -40,6 +40,7 @@ namespace Acciaio.Editor
                 }
                 else
                 {
+					if (@object == null) return null;
                     @object = @object.GetType()
                         .GetField(pathElement, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                         .GetValue(@object);
