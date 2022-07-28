@@ -1,5 +1,5 @@
 {
-    "name": "Acciaio",
+    "name": "Acciaio Systems",
     "rootNamespace": "Acciaio",
     "references": [
         "Unity.Addressables",
