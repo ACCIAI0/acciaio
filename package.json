@@ -1,7 +1,13 @@
 {
-    "name":"com.acciaio-systems",
+    "name":"com.abambini.acciaiosystems",
     "displayName": "Acciaio Systems",
     "version": "1.0.0-alpha",
     "description": "A C# library developed for Unity offering a ready-to-go architecture for bootstrapping games, managing loading seamless transitions between scenes and organizing core functionalities (Systems). ",
-    "unity": "2021.2"
+    "unity": "2021.2",
+    "documentationUrl": "https://github.com/ACCIAI0/acciaio-systems/wiki",
+    "author": {
+        "name": "Alberto Bambini",
+        "email": "abambini95@gmail.com",
+        "url": "https://github.com/ACCIAI0"
+    }
 }
