@@ -1,9 +1,6 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,7 +8,15 @@ namespace Acciaio.Editor
 {
     public static class SerializedPropertyExtensions
     {
+		private const BindingFlags INSTANCE_ANY = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
         private const string PATH_ELEMENT_ARRAY = "Array";
+
+		private static void SetDefaultConstructorValue(SerializedProperty property)
+		{
+			var parent = GetObject(property, true);
+			var field = parent.GetType().GetField(property.name,  INSTANCE_ANY);
+			field.SetValue(parent, Activator.CreateInstance(field.FieldType, true));
+		}
 
         private static object GetObject(SerializedProperty property, bool stopAtParent)
         {
@@ -44,7 +49,7 @@ namespace Acciaio.Editor
 					FieldInfo field = null;
 					do
 					{
-						field = type.GetField(pathElement, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+						field = type.GetField(pathElement, INSTANCE_ANY);
 						if (field == null) type = type.BaseType;
 					} while (field == null && type != typeof(object));
                     @object = field?.GetValue(@object);
@@ -57,7 +62,7 @@ namespace Acciaio.Editor
         {
             if (property.propertyType != SerializedPropertyType.Gradient) return null;
             return property.GetType()
-                    .GetProperty("gradientValue", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                    .GetProperty("gradientValue", INSTANCE_ANY)
                     .GetValue(property) as Gradient;
         }
 
@@ -70,7 +75,7 @@ namespace Acciaio.Editor
             }
 
             property.GetType()
-                    .GetProperty("gradientValue", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                    .GetProperty("gradientValue", INSTANCE_ANY)
                     .SetValue(property, gradient);
         }
 
@@ -153,6 +158,8 @@ namespace Acciaio.Editor
 					property.vector4Value = default;
 					break;
 				case SerializedPropertyType.Generic:
+					SetDefaultConstructorValue(property);
+					break;
 				case SerializedPropertyType.ObjectReference:
 				case SerializedPropertyType.AnimationCurve:
 				default:
