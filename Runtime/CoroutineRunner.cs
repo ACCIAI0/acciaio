@@ -25,7 +25,9 @@ namespace Acciaio
 			private readonly float _secondsDelay;
 			private Coroutine _routine;
 
-			public override bool keepWaiting => _routine != null;
+			public bool IsDone => _routine == null;
+
+			public override bool keepWaiting => !IsDone;
 
 			protected CancelableDelay(float delay)
 			{
