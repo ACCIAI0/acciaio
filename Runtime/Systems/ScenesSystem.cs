@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 #if USE_ADDRESSABLES
+using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
@@ -61,6 +62,8 @@ namespace Acciaio
 		private SceneOperation _operation;
 
         public override bool IsRunning => _isRunning;
+
+		public Scene ActiveScene => SceneManager.GetActiveScene();
 
 		private IEnumerator LoadSceneCo(string scene, bool useAddressables, string loadingScene)
 		{
@@ -134,6 +137,20 @@ namespace Acciaio
 				yield return SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
 		}
 
+        protected override IEnumerator RunRoutine()
+        {
+            Debug.Log("[Scenes System] Online");
+			_isRunning = true;
+			yield break;
+        }
+
+        protected override IEnumerator ShutdownRoutine()
+        {
+            Debug.Log("[Scenes System] Shutdown");
+			_isRunning = false;
+			yield break;
+        }
+
 		public SceneOperation LoadScene(string scene) => LoadScene(scene, null);
 
 		public SceneOperation LoadScene(string scene, string loadingScene) => LoadScene(scene, false, loadingScene);
@@ -204,18 +221,6 @@ namespace Acciaio
 			SceneManager.UnloadSceneAsync(scene);
 		}
 
-        protected override IEnumerator RunRoutine()
-        {
-            Debug.Log("[Scenes System] Online");
-			_isRunning = true;
-			yield break;
-        }
-
-        protected override IEnumerator ShutdownRoutine()
-        {
-            Debug.Log("[Scenes System] Shutdown");
-			_isRunning = false;
-			yield break;
-        }
+		public Scene GetSceneByName(string name) => SceneManager.GetSceneByName(name);
     }
 }
