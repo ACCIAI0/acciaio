@@ -27,23 +27,26 @@ namespace Acciaio
 
             public override bool keepWaiting => _keepWaiting;
 
-			public SystemOperation(Action<bool> callback)
+			public SystemOperation(string systemsSceneName, Action<bool> callback)
 			{
-				_op = SceneManager.LoadSceneAsync(SCENE_NAME, LoadSceneMode.Additive);
+				_op = SceneManager.LoadSceneAsync(systemsSceneName, LoadSceneMode.Additive);
 				_op.completed += _ =>
 				{
-					var scene = SceneManager.GetSceneByName(SCENE_NAME);
+					var scene = SceneManager.GetSceneByName(systemsSceneName);
 					if (!scene.IsValid())
 					{
-						Debug.LogError($"Systems scene '{SCENE_NAME}' was not loaded correctly. Maybe it wasn't added to the build order?");
+						Debug.LogError($"Systems scene '{systemsSceneName}' was not loaded correctly. Maybe it wasn't added to the build order?");
 						_keepWaiting = false;
 						callback?.Invoke(false);
 						return;
 					}
 
+					ActiveSystemsScene = scene;
+
 					var systems = scene.GetRootGameObjects()
 							.Select(o => o.GetComponent<ISystem>())
 							.Where(o => o != null)
+							.OrderBy(s => s.Priority)
 							.ToList();
 					systems.ForEach(s => _systems.Add(s.GetType(), s));
 					CoroutineRunner.Start(Coroutine(systems, callback));
@@ -62,19 +65,26 @@ namespace Acciaio
 
 		private static readonly Dictionary<Type, ISystem> _systems = new();
 
+		public static Scene ActiveSystemsScene { get; private set; }
 		public static bool Ready { get; private set; }
 
 		/// <summary>
 		/// Initializes the Systems architecture. To wait for the operations to complete, yield on this call in a coroutine.
 		/// </summary>
-		public static CustomYieldInstruction Load(Action<bool> callback = null)
+		public static CustomYieldInstruction Load(Action<bool> callback = null) => Load(SCENE_NAME, callback);
+
+		/// <summary>
+		/// Initializes the Systems architecture with the specified Systems scene name.
+		/// To wait for the operations to complete, yield on this call in a coroutine.
+		/// </summary>
+		public static CustomYieldInstruction Load(string systemsSceneName, Action<bool> callback = null)
 		{
 			if (Ready)
 			{
 				callback?.Invoke(Ready);
 				return NoOp.Instance;
 			}
-			return new SystemOperation(callback);
+			return new SystemOperation(systemsSceneName, callback);
 		}
 
 		/// <summary>

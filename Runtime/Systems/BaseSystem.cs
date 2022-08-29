@@ -5,6 +5,10 @@ namespace Acciaio
 {
 	public abstract class BaseSystem<TSystem> : Singleton<TSystem>, ISystem where TSystem : BaseSystem<TSystem>
 	{
+		[field: Header("System")]
+		[field: SerializeField]
+		public int Priority { get; private set; }
+
 		public abstract bool IsRunning { get; }
 
 		private IEnumerator InternalRun()

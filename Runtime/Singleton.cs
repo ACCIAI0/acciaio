@@ -12,6 +12,7 @@ namespace Acciaio
 		public static T Instance { get; private set; }
 		public static bool Exists => Instance != null;
 
+		[Header("Singleton")]
 		[SerializeField]
 		private bool _preventReplacement;
 		[SerializeField]
