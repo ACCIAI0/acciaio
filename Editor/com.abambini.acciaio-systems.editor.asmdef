@@ -13,12 +13,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [
-        {
-            "name": "com.dbrizov.naughtyattributes",
-            "expression": "2.1.4",
-            "define": "USE_NAUGHTY_ATTRIBUTES"
-        }
-    ],
+    "versionDefines": [],
     "noEngineReferences": false
 }

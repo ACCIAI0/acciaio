@@ -5,7 +5,6 @@ using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 
 namespace Acciaio.Editor
 {
@@ -93,71 +92,7 @@ namespace Acciaio.Editor
 		[SerializeField]
 		private bool _isActive = false;
 
-		[SerializeField, Scene]
+		[SerializeField]
 		private string _startupScene = null;
-	}
-
-	static class EditorSceneSettingsProvider
-	{
-		private const string SETTINGS_MENU_PATH = "Acciaio/Scenes";
-		private const string NONE_VALUE = "(None)";
-
-		[SettingsProvider]
-		public static SettingsProvider Provide()
-		{
-			return new(SETTINGS_MENU_PATH, SettingsScope.Project)
-			{
-				activateHandler = (searchContext, rootElement) =>
-            	{
-					var settings = EditorScenesSettings.GetSerializedSettings();
-
-					var isActive = settings.FindProperty("_isActive");
-					var startupScene = settings.FindProperty("_startupScene");
-
-					var container = new VisualElement();
-					container.style.flexDirection = FlexDirection.Row;
-
-					var title = new Label("Acciaio Scenes");
-					title.style.fontSize = 20;
-					title.style.unityFontStyleAndWeight = FontStyle.Bold;
-
-					var scenes = AcciaioEditor.BuildScenesListForField(true, NONE_VALUE).ToList();
-					var defaultValue = startupScene.stringValue;
-					if (string.IsNullOrEmpty(defaultValue)) defaultValue = NONE_VALUE;
-
-					PopupField<string> popup = new("Startup Scene", scenes, defaultValue);
-					popup.SetEnabled(isActive.boolValue);
-
-					popup.RegisterCallback<ChangeEvent<string>>(
-						evt =>
-						{
-							var value = evt.newValue;
-							if (value == NONE_VALUE) value = "";
-							startupScene.stringValue = value;
-							settings.ApplyModifiedProperties();
-						}
-					);
-
-                    Toggle toggle = new()
-                    {
-                        value = isActive.boolValue
-                    };
-
-                    toggle.RegisterCallback<ChangeEvent<bool>>(
-						evt => 
-						{
-							isActive.boolValue = evt.newValue; 
-							popup.SetEnabled(isActive.boolValue);
-							settings.ApplyModifiedProperties();
-						}
-					);
-
-					container.Add(toggle);
-					container.Add(popup);
-					rootElement.Add(title);
-					rootElement.Add(container);
-				}
-			};
-		}
 	}
 }
