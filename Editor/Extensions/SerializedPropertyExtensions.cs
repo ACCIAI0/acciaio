@@ -79,6 +79,8 @@ namespace Acciaio.Editor
                     .SetValue(property, gradient);
         }
 
+		public static Type GetType(this SerializedProperty property) => GetObject(property, false).GetType();
+
         public static T GetValue<T>(this SerializedProperty property)
         {
             var @object = GetObject(property, false);
