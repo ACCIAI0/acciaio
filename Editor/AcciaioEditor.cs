@@ -7,7 +7,7 @@ namespace Acciaio.Editor
 {
 	public static class AcciaioEditor
 	{
-		private static string[] BuildScenesListForField(bool allowEmpty, string emptyLabel)
+		public static string[] BuildScenesListForField(bool allowEmpty, string emptyLabel)
 		{
 			var scenesList = System.Linq.Enumerable.Empty<string>();
 			if (allowEmpty) scenesList = System.Linq.Enumerable.Repeat(emptyLabel ?? "-", 1);

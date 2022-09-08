@@ -19,10 +19,10 @@ namespace Acciaio.Editor
 		{
 			serializedObject.Update();
 			EditorGUILayout.BeginHorizontal();
+			_isActive.boolValue = EditorGUILayout.Toggle(GUIContent.none, _isActive.boolValue, GUILayout.MaxWidth(20));
 			EditorGUI.BeginDisabledGroup(!_isActive.boolValue);
 			_startupScene.stringValue = AcciaioEditor.SceneField("Startup Scene", _startupScene.stringValue, true, "(None)");
 			EditorGUI.EndDisabledGroup();
-			_isActive.boolValue = EditorGUILayout.Toggle(GUIContent.none, _isActive.boolValue, GUILayout.MaxWidth(20));
 			EditorGUILayout.EndHorizontal();
 			serializedObject.ApplyModifiedProperties();
 		}	
