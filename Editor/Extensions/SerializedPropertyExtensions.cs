@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -169,5 +170,17 @@ namespace Acciaio.Editor
 					break;
 			}
         }
+
+		public static T GetAttribute<T>(this SerializedProperty property) where T : PropertyAttribute
+		{
+			FieldInfo info = GetObject(property, true).GetType().GetField(property.name, INSTANCE_ANY);
+			return info.GetCustomAttribute<T>();
+		}
+
+		public static IEnumerable<T> GetAttributes<T>(this SerializedProperty property) where T : PropertyAttribute
+		{
+			FieldInfo info = GetObject(property, true).GetType().GetField(property.name, INSTANCE_ANY);
+			return info.GetCustomAttributes<T>();
+		}
     }
 }

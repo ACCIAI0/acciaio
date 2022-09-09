@@ -41,7 +41,6 @@ namespace Acciaio
         public static bool operator !=(DecoupledScene ds1, DecoupledScene ds2) => !ds1.Equals(ds2);
 		public static bool operator ==(DecoupledScene ds1, string s2) => ds1.Equals(s2);
         public static bool operator !=(DecoupledScene ds1, string s2) => !ds1.Equals(s2);
-
 		public static bool operator ==(string s1, DecoupledScene ds2) => ds2.Equals(s1);
         public static bool operator !=(string s1, DecoupledScene ds2) => !ds2.Equals(s1);
 

@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 using System.Reflection;
 
 namespace Acciaio.Editor
@@ -11,24 +13,12 @@ namespace Acciaio.Editor
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => 
 				(!AcciaioEditor.GetBuildSettingsScenes().Any() ? 2 : 1) * EditorGUI.GetPropertyHeight(property.propertyType, label);
 
-		public sealed override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
+		public void OnGUI(Rect rect, SerializedProperty property, GUIContent label, bool allowEmpty, string emptyLabel)
 		{
-			if (!AcciaioEditor.GetBuildSettingsScenes().Any())
-			{
-				EditorGUI.HelpBox(rect, "There are no applicable scenes in build order.", MessageType.Info);
-				return;
-			}
-
-			var obj = property.serializedObject.targetObject;
-			var field = obj.GetType()
-					.GetField(property.name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-			var att = field.GetCustomAttribute<SceneAttribute>();
-
 			if (property.propertyType != SerializedPropertyType.String && 
-				property.propertyType != SerializedPropertyType.Integer && 
-				field.FieldType != typeof(DecoupledScene))
+				property.propertyType != SerializedPropertyType.Integer)
 			{
-				base.OnGUI(rect, property, label);
+				EditorGUI.PropertyField(rect, property, label);
 				return;
 			}
 
@@ -39,13 +29,65 @@ namespace Acciaio.Editor
 				var sceneProperty = property.FindPropertyRelative("_scene");
 				var value = property.propertyType == SerializedPropertyType.String ? property.stringValue :
 						sceneProperty.stringValue;
-				var newValue = AcciaioEditor.SceneField(rect, label, value, att.ShowNoneOption, att.NoneOptionLabel);
+				var newValue = AcciaioEditor.SceneField(rect, label, value, allowEmpty, emptyLabel);
 				if (value == newValue) return;
-				value = att.ShowNoneOption && newValue == att.NoneOptionLabel ? null : newValue;
 				if (property.propertyType == SerializedPropertyType.String) 
-					property.stringValue = value;
-				else sceneProperty.stringValue = value;
+					property.stringValue = newValue;
+				else sceneProperty.stringValue = newValue;
 			}
-		}		
+		}
+
+		public VisualElement CreatePropertyGUI(SerializedProperty property, bool allowEmpty, string emptyLabel)
+		{
+			if (property.propertyType != SerializedPropertyType.String && property.propertyType != SerializedPropertyType.Integer)
+				return new PropertyField(property);
+
+			VisualElement element = null;
+			if (property.propertyType == SerializedPropertyType.Integer)
+			{
+				element = AcciaioEditor.CreateSceneField(
+					ObjectNames.NicifyVariableName(property.name), 
+					property.intValue,
+					i => 
+					{
+						property.intValue = i;
+						property.serializedObject.ApplyModifiedProperties();
+					});
+			}
+			else
+			{
+				element = AcciaioEditor.CreateSceneField(
+					ObjectNames.NicifyVariableName(property.name),
+					property.stringValue, 
+					allowEmpty, 
+					emptyLabel,
+					s => 
+					{
+						property.stringValue = s;
+						property.serializedObject.ApplyModifiedProperties();
+					});
+			}
+			return element;
+		}
+
+		public sealed override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
+		{
+			if (!AcciaioEditor.GetBuildSettingsScenes().Any())
+			{
+				EditorGUI.HelpBox(rect, "There are no applicable scenes in build order.", MessageType.Info);
+				return;
+			}
+			var att = fieldInfo.GetCustomAttribute<SceneAttribute>();
+			OnGUI(rect, property, label, att.ShowNoneOption, att.NoneOptionLabel);
+		}
+
+		public override VisualElement CreatePropertyGUI(SerializedProperty property)
+		{
+			if (!AcciaioEditor.GetBuildSettingsScenes().Any())
+				return new HelpBox("There are no applicable scenes in build order.", HelpBoxMessageType.Info);
+
+			var att = fieldInfo.GetCustomAttribute<SceneAttribute>();
+			return CreatePropertyGUI(property, att.ShowNoneOption, att.NoneOptionLabel);
+		}	
 	}
 }

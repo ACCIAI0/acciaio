@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using Acciaio.Editor;
 using System.Reflection;
+using UnityEngine.UIElements;
 
 namespace Acciaio.Collections.Generic.Editor
 {
@@ -96,14 +97,6 @@ namespace Acciaio.Collections.Generic.Editor
             return _list;
         }
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            var serializedEntries = property.FindPropertyRelative(LIST_NAME);
-            RetrieveList(serializedEntries, label).DoList(position);
-
-            property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
-        }
-
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             var totHeight = 0f;
@@ -112,6 +105,23 @@ namespace Acciaio.Collections.Generic.Editor
             totHeight += RetrieveList(serializedEntries, label).GetHeight();
 
             return totHeight;
+        }
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var serializedEntries = property.FindPropertyRelative(LIST_NAME);
+            RetrieveList(serializedEntries, label).DoList(position);
+
+            property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
+        }
+
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
+        {
+            IMGUIContainer container = new();
+            container.style.flexGrow = 1;
+            container.style.flexShrink = 1;
+            container.onGUIHandler = () => OnGUI(container.contentRect, property, new GUIContent(ObjectNames.NicifyVariableName(property.name)));
+            return container;
         }
     }
 }

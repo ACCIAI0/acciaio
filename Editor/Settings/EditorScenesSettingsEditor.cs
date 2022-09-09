@@ -54,17 +54,13 @@ namespace Acciaio.Editor
 			title.style.fontSize = TITLE_FONT_SIZE;
 			title.style.unityFontStyleAndWeight = FontStyle.Bold;
 
-			var scenes = AcciaioEditor.BuildScenesListForField(true, NONE_VALUE).ToList();
+			var scenes = AcciaioEditor.BuildScenesArrayForField(true, NONE_VALUE).ToList();
 			var defaultValue = startupScene.stringValue;
 			if (string.IsNullOrEmpty(defaultValue)) defaultValue = NONE_VALUE;
 
 			PopupField<string> popup = new("Editor Startup Scene", scenes, defaultValue);
-			var grow = popup.style.flexGrow;
-			grow.value = 1;
-			var shrink = popup.style.flexShrink;
-			shrink.value = 1;
-			popup.style.flexGrow = grow;
-			popup.style.flexShrink = shrink;
+			popup.style.flexGrow = 1;
+			popup.style.flexShrink = 1;
 			popup.style.overflow = Overflow.Hidden;
 			popup.SetEnabled(isActive.boolValue);
 
