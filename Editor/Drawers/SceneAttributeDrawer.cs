@@ -8,7 +8,7 @@ using System.Reflection;
 namespace Acciaio.Editor
 {
 	[CustomPropertyDrawer(typeof(SceneAttribute))]
-	public class SceneAttributeDrawer : PropertyDrawer
+	public sealed class SceneAttributeDrawer : PropertyDrawer
 	{
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => 
 				(!AcciaioEditor.GetBuildSettingsScenes().Any() ? 2 : 1) * EditorGUI.GetPropertyHeight(property.propertyType, label);

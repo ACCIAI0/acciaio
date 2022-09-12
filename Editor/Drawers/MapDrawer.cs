@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 namespace Acciaio.Collections.Generic.Editor
 {
     [CustomPropertyDrawer(typeof(Map<,>), true)]
-    public class MapDrawer : PropertyDrawer
+    public sealed class MapDrawer : PropertyDrawer
     {
         private const int MARGIN = 2;
         private const int ICON_SIZE = 20;

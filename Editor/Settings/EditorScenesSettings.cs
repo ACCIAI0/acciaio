@@ -1,15 +1,13 @@
-using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Acciaio.Editor
 {
 	[InitializeOnLoad]
-	public class EditorScenesSettings : ScriptableObject
+	public sealed class EditorScenesSettings : ScriptableObject
 	{
 		/// <summary>
 		/// Editor Prefs key for retrieving the scene that is currently being edited.

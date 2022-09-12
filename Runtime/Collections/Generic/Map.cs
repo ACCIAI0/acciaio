@@ -15,7 +15,7 @@ namespace Acciaio.Collections.Generic
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     [Serializable]
-    public class Map<TKey, TValue> : IDictionary, IDictionary<TKey, TValue>, ISerializationCallbackReceiver
+    public sealed class Map<TKey, TValue> : IDictionary, IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
         [Serializable]
         private struct Entry

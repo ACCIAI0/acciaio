@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 namespace Acciaio.Editor
 {
 	[CustomPropertyDrawer(typeof(DecoupledScene))]
-	public class DecoupledSceneDrawer : UnityEditor.PropertyDrawer
+	public sealed class DecoupledSceneDrawer : UnityEditor.PropertyDrawer
 	{
 		private readonly SceneAttributeDrawer _drawer = new();
 

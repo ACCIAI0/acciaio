@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Acciaio
 {
 	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
-	public class SceneAttribute : PropertyAttribute
+	public sealed class SceneAttribute : PropertyAttribute
 	{
 		private const string DEFAULT_NONE_LABEL = "(None)";
 		public bool ShowNoneOption { get; }

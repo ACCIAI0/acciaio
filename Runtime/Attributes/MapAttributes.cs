@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Acciaio.Collections.Generic
 {
-    public class MapNames : PropertyAttribute
+    public sealed class MapNames : PropertyAttribute
     {
         public static readonly string DEFAULT_KEY = "Key";
         public static readonly string DEFAULT_VALUE = "Value";

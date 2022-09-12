@@ -13,7 +13,7 @@ using UnityEngine.ResourceManagement.ResourceProviders;
 
 namespace Acciaio
 {
-    public class ScenesSystem : BaseSystem<ScenesSystem>
+    public sealed class ScenesSystem : BaseSystem<ScenesSystem>
     {
 		public sealed class SceneOperation : CustomYieldInstruction
 		{

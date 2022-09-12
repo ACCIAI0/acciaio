@@ -5,9 +5,9 @@ namespace Acciaio
 {
 	public static class CoroutineRunner
 	{
-		private class StaticCoroutineRunner : MonoBehaviour { }
+		private sealed class StaticCoroutineRunner : MonoBehaviour { }
 
-		private class DelayedAction : CancelableDelay
+		private sealed class DelayedAction : CancelableDelay
 		{
 			private readonly System.Action _action;
 

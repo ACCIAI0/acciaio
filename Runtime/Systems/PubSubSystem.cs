@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Acciaio
 {
-    public class PubSubSystem : BaseSystem<PubSubSystem>
+    public sealed class PubSubSystem : BaseSystem<PubSubSystem>
     {
 		private readonly Dictionary<string, PubSubBoard> _boards = new();
 

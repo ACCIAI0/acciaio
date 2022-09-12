@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 namespace Acciaio.Editor
 {
 	[CustomEditor(typeof(EditorScenesSettings))]
-	public class EditorScenesSettingsEditor : UnityEditor.Editor
+	public sealed class EditorScenesSettingsEditor : UnityEditor.Editor
 	{
 		private const string NONE_VALUE = "(None)";
 		private const int TITLE_MARGIN_TOP = 2;
