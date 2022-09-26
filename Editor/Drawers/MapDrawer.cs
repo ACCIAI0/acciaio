@@ -17,7 +17,7 @@ namespace Acciaio.Collections.Generic.Editor
         private const string LIST_NAME = "_serializedEntries";
         private const string KEY_NAME = "Key";
         private const string VALUE_NAME = "Value";
-        private const string DUP_TOOLTIP = "This voice is a duplicate and will be ignored.";
+        private const string DUP_TOOLTIP = "This entry is a duplicate and will be ignored.";
         private const string NULL_TOOLTIP = "A key with a null value will be ignored.";
         private const string KEY_DUP_NAME = "<color=yellow>{0} [DUPLICATE]</color>";
         private const string KEY_NULL_NAME = "<color=red>{0} [NULL]</color>";
@@ -43,7 +43,7 @@ namespace Acciaio.Collections.Generic.Editor
         {
             if (_list != null) return _list;
 
-            var names = fieldInfo.GetCustomAttribute<MapNames>();
+            var names = fieldInfo.GetCustomAttribute<MapNamesAttribute>();
             _list = new ReorderableList(property.serializedObject, property, true, true, true, true)
             {
                 drawHeaderCallback = rect => EditorGUI.LabelField(rect, label),
@@ -61,7 +61,7 @@ namespace Acciaio.Collections.Generic.Editor
                     var key = entry.FindPropertyRelative(KEY_NAME);
                     var value = entry.FindPropertyRelative(VALUE_NAME);
 
-                    string keyName = names?.KeyName ?? MapNames.DEFAULT_KEY;
+                    string keyName = names?.KeyName ?? MapNamesAttribute.DEFAULT_KEY;
                     string keyTooltip = "";
 
                     bool isNullKey = key.propertyType == SerializedPropertyType.ObjectReference && key.objectReferenceValue == null;
@@ -82,7 +82,7 @@ namespace Acciaio.Collections.Generic.Editor
 
                     var valueRect = new Rect(rect.x, keyRect.y + keyRect.height, rect.width,
                         EditorGUI.GetPropertyHeight(value, true));
-                    EditorGUI.PropertyField(valueRect, value, new GUIContent(names?.ValueName ?? MapNames.DEFAULT_VALUE), true);
+                    EditorGUI.PropertyField(valueRect, value, new GUIContent(names?.ValueName ?? MapNamesAttribute.DEFAULT_VALUE), true);
                 },
                 onAddCallback = list =>
                 {

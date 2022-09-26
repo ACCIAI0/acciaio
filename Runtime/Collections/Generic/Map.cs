@@ -12,8 +12,8 @@ namespace Acciaio.Collections.Generic
     /// better highlight it's serializable, but it's implemented as a Dictionary which
     /// is retrievable by calling AsDictionary().
     /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
+    /// <typeparam name="TKey">Type of key items</typeparam>
+    /// <typeparam name="TValue">Type of value items</typeparam>
     [Serializable]
     public sealed class Map<TKey, TValue> : IDictionary, IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
@@ -54,6 +54,8 @@ namespace Acciaio.Collections.Generic
             public static bool operator !=(KeyValuePair<TKey, TValue> kvp, Entry e) => !(e == kvp);
         }
 
+        public static Map<TKey, TValue> WrapDictionary(Dictionary<TKey, TValue> dictionary) => new(dictionary);
+
         private readonly Dictionary<TKey, TValue> _internal;
         private readonly List<Entry> _serializationMiddleman = new();
 
@@ -93,32 +95,45 @@ namespace Acciaio.Collections.Generic
 
         ICollection IDictionary.Values => InternalIDict.Values;
 
+        private Map(Dictionary<TKey, TValue> dictionaryToWrap) => 
+            _internal = dictionaryToWrap;
+
         public Map() =>
-                _internal = new Dictionary<TKey, TValue>();
+            _internal = new Dictionary<TKey, TValue>();
 
         public Map(IDictionary<TKey, TValue> dict) =>
-                _internal = new Dictionary<TKey, TValue>(dict);
+            _internal = new Dictionary<TKey, TValue>(dict);
 
         public Map(IEqualityComparer<TKey> comparer) =>
-                _internal = new Dictionary<TKey, TValue>(comparer);
+            _internal = new Dictionary<TKey, TValue>(comparer);
 
         public Map(int capacity) =>
-                _internal = new Dictionary<TKey, TValue>(capacity);
+            _internal = new Dictionary<TKey, TValue>(capacity);
 
         public Map(IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer) =>
-                _internal = new Dictionary<TKey, TValue>(dict, comparer);
+            _internal = new Dictionary<TKey, TValue>(dict, comparer);
 
         public Map(int capacity, IEqualityComparer<TKey> comparer) =>
-                _internal = new Dictionary<TKey, TValue>(capacity, comparer);
+            _internal = new Dictionary<TKey, TValue>(capacity, comparer);
 
+        /// <summary>
+        /// Accesses the wrapped dictionary directly. Changes to that dictionary are reflected in this Map and vice-versa.
+        /// To create an independent copy, see ToDictionary() instead.
+        /// </summary>
         public Dictionary<TKey, TValue> AsDictionary() => _internal;
+
+        /// <summary>
+        /// Creates a new Dictionary starting from this Map. The new Dictionary is independent and changes
+        /// in it are not reflected on this Map. To create a view on this map, see AsDictionary() instead.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<TKey, TValue> ToDictionary() => new(_internal);
 
         public void OnAfterDeserialize()
         {
             _internal.Clear();
             _serializationMiddleman.Clear();
             _serializationMiddleman.AddRange(_serializedEntries);
-            var iDict = _internal as IDictionary<TKey, TValue>;
             var elementsNumber = _serializedEntries.Count;
             for(int i = 0, check = 0; i < elementsNumber; i++)
             {
@@ -129,7 +144,7 @@ namespace Acciaio.Collections.Generic
                 }
                 else
                 {
-                    iDict.Add(entry);
+                    InternalGeneric.Add(entry);
                     _serializationMiddleman.RemoveAt(check);
                 }
             }
