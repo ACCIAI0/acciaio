@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace Acciaio
 {
+	[Conditional("UNITY_EDITOR")]
 	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
 	public sealed class SceneAttribute : PropertyAttribute
 	{

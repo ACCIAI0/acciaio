@@ -1,7 +1,11 @@
+using System;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace Acciaio.Collections.Generic
 {
+    [Conditional("UNITY_EDITOR")]
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
     public sealed class MapNamesAttribute : PropertyAttribute
     {
         public static readonly string DEFAULT_KEY = "Key";
