@@ -4,6 +4,7 @@ using UnityEditorInternal;
 using Acciaio.Editor;
 using System.Reflection;
 using UnityEngine.UIElements;
+using System.Collections.Generic;
 
 namespace Acciaio.Collections.Generic.Editor
 {
@@ -22,7 +23,7 @@ namespace Acciaio.Collections.Generic.Editor
         private const string KEY_DUP_NAME = "<color=yellow>{0} [DUPLICATE]</color>";
         private const string KEY_NULL_NAME = "<color=red>{0} [NULL]</color>";
 
-        private ReorderableList _list = null;
+        private readonly Dictionary<string, ReorderableList> lists = new();
 
         private static bool IsAlreadyPresent(SerializedProperty list, int index)
         {
@@ -41,16 +42,16 @@ namespace Acciaio.Collections.Generic.Editor
 
         private ReorderableList RetrieveList(SerializedProperty property, GUIContent label)
         {
-            if (_list != null) return _list;
+            if (lists.ContainsKey(property.propertyPath)) return lists[property.propertyPath];
 
             var names = fieldInfo.GetCustomAttribute<MapNamesAttribute>();
-            _list = new ReorderableList(property.serializedObject, property, true, true, true, true)
+            ReorderableList list = new(property.serializedObject, property, true, true, true, true)
             {
                 drawHeaderCallback = rect => EditorGUI.LabelField(rect, label),
                 elementHeightCallback = index =>
                 {
-                    if (_list.serializedProperty.arraySize == 0) return EditorGUIUtility.singleLineHeight;
-                    var entry = _list.serializedProperty.GetArrayElementAtIndex(index);
+                    if (property.arraySize == 0) return EditorGUIUtility.singleLineHeight;
+                    var entry = property.GetArrayElementAtIndex(index);
                     var key = entry.FindPropertyRelative(KEY_NAME);
                     var value = entry.FindPropertyRelative(VALUE_NAME);
                     return EditorGUI.GetPropertyHeight(key, true) + EditorGUI.GetPropertyHeight(value, true) + 4;
@@ -60,7 +61,7 @@ namespace Acciaio.Collections.Generic.Editor
                     rect.y += 2;
                     rect.height -= 2;
 
-                    var entry = _list.serializedProperty.GetArrayElementAtIndex(index);
+                    var entry = property.GetArrayElementAtIndex(index);
                     var key = entry.FindPropertyRelative(KEY_NAME);
                     var value = entry.FindPropertyRelative(VALUE_NAME);
 
@@ -97,7 +98,8 @@ namespace Acciaio.Collections.Generic.Editor
                     value.SetToDefault();
                 }
             };
-            return _list;
+            lists.Add(property.propertyPath, list);
+            return list;
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
