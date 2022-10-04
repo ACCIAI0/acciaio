@@ -12,8 +12,8 @@ namespace Acciaio.Collections.Generic.Editor
     {
         private const int MARGIN = 2;
         private const int ICON_SIZE = 20;
-        private const string WARN_ICON_NAME = "console.warnicon.sml";
-        private const string ERR_ICON_NAME = "console.erroricon.sml";
+        private const string WARN_ICON_NAME = "console.warnicon@2x";
+        private const string ERR_ICON_NAME = "console.erroricon@2x";
         private const string LIST_NAME = "_serializedEntries";
         private const string KEY_NAME = "Key";
         private const string VALUE_NAME = "Value";
@@ -53,10 +53,13 @@ namespace Acciaio.Collections.Generic.Editor
                     var entry = _list.serializedProperty.GetArrayElementAtIndex(index);
                     var key = entry.FindPropertyRelative(KEY_NAME);
                     var value = entry.FindPropertyRelative(VALUE_NAME);
-                    return EditorGUI.GetPropertyHeight(key, true) + EditorGUI.GetPropertyHeight(value, true);
+                    return EditorGUI.GetPropertyHeight(key, true) + EditorGUI.GetPropertyHeight(value, true) + 4;
                 },
                 drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
+                    rect.y += 2;
+                    rect.height -= 2;
+                    
                     var entry = _list.serializedProperty.GetArrayElementAtIndex(index);
                     var key = entry.FindPropertyRelative(KEY_NAME);
                     var value = entry.FindPropertyRelative(VALUE_NAME);
@@ -67,7 +70,7 @@ namespace Acciaio.Collections.Generic.Editor
                     bool isNullKey = key.propertyType == SerializedPropertyType.ObjectReference && key.objectReferenceValue == null;
                     if (isNullKey || IsAlreadyPresent(property, index))
                     {
-                        var iconRect = new Rect(rect.x - ICON_SIZE + MARGIN, rect.y + ICON_SIZE - MARGIN, ICON_SIZE,
+                        var iconRect = new Rect(rect.x - ICON_SIZE + MARGIN, rect.y + MARGIN, ICON_SIZE,
                             ICON_SIZE);
                         var icon = isNullKey ? ERR_ICON_NAME : WARN_ICON_NAME;
                         keyTooltip = isNullKey ? NULL_TOOLTIP : DUP_TOOLTIP;
@@ -111,16 +114,18 @@ namespace Acciaio.Collections.Generic.Editor
         {
             var serializedEntries = property.FindPropertyRelative(LIST_NAME);
             RetrieveList(serializedEntries, label).DoList(position);
-
             property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
         }
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
+             var serializedEntries = property.FindPropertyRelative(LIST_NAME);
             IMGUIContainer container = new();
-            container.style.flexGrow = 1;
-            container.style.flexShrink = 1;
-            container.onGUIHandler = () => OnGUI(container.contentRect, property, new GUIContent(ObjectNames.NicifyVariableName(property.name)));
+            container.onGUIHandler = () =>
+            {
+                RetrieveList(serializedEntries, new GUIContent(ObjectNames.NicifyVariableName(property.name))).DoLayoutList();
+                property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
+            };
             return container;
         }
     }
