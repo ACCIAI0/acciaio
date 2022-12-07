@@ -122,11 +122,13 @@ namespace Acciaio.Collections.Generic.Editor
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
              var serializedEntries = property.FindPropertyRelative(LIST_NAME);
-            IMGUIContainer container = new();
-            container.onGUIHandler = () =>
+            IMGUIContainer container = new()
             {
-                RetrieveList(serializedEntries, new GUIContent(ObjectNames.NicifyVariableName(property.name))).DoLayoutList();
-                property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
+                onGUIHandler = () =>
+                {
+                    RetrieveList(serializedEntries, new GUIContent(ObjectNames.NicifyVariableName(property.name))).DoLayoutList();
+                    property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
+                }
             };
             return container;
         }

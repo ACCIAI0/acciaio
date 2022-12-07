@@ -11,15 +11,6 @@ namespace Acciaio
 	{
 		public const string SCENE_NAME = "Systems";
 
-		private class NoOp : CustomYieldInstruction
-		{
-			public static readonly NoOp Instance = new NoOp();
-
-			public override bool keepWaiting => false;
-
-			private NoOp() {}
-		}
-
         private class SystemOperation : CustomYieldInstruction
         {
 			private readonly AsyncOperation _op;
@@ -44,11 +35,11 @@ namespace Acciaio
 					ActiveSystemsScene = scene;
 
 					var systems = scene.GetRootGameObjects()
-							.Select(o => o.GetComponent<ISystem>())
-							.Where(o => o != null)
-							.OrderBy(s => s.Priority)
+							.Select(@object => @object.GetComponent<ISystem>())
+							.Where(system => system != null)
+							.OrderBy(system => system.Priority)
 							.ToList();
-					systems.ForEach(s => _systems.Add(s.GetType(), s));
+					systems.ForEach(system => _systems.Add(system.GetType(), system));
 					CoroutineRunner.Start(Coroutine(systems, callback));
 				};
 			}
@@ -82,7 +73,7 @@ namespace Acciaio
 			if (Ready)
 			{
 				callback?.Invoke(Ready);
-				return NoOp.Instance;
+				return null;
 			}
 			return new SystemOperation(systemsSceneName, callback);
 		}

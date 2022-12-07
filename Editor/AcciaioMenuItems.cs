@@ -9,13 +9,11 @@ namespace Acciaio.Editor
     {
         private const string SYSTEMS_SCENE_PATH_FORMAT = "Assets/_Scenes/{0}.unity";
 
-        private const string DIALOG_MESSAGE = "This will create and add a new scene in the build order and a settings asset in Assets/Editor, proceed?";
+        private static bool AssetExists<T>(string path) where T : Object 
+            => AssetDatabase.LoadAssetAtPath<T>(path) != null;
 
-        private static bool AssetExists<T>(string path) where T : Object => 
-            AssetDatabase.LoadAssetAtPath<T>(path) != null;
-
-        [MenuItem("Tools/Acciaio/Create Systems Scene", false, 51)]
-        private static void CreateSystemsScene()
+        [MenuItem("Tools/Acciaio/Create Firestart Systems Scene", false, 51)]
+        public static void CreateSystemsScene()
         {
             if (!AssetDatabase.IsValidFolder("Assets/_Scenes"))
                 AssetDatabase.CreateFolder("Assets", "_Scenes");

@@ -5,8 +5,6 @@ namespace Acciaio
 {
 	public static class CoroutineRunner
 	{
-		private sealed class StaticCoroutineRunner : MonoBehaviour { }
-
 		private sealed class DelayedAction : CancelableDelay
 		{
 			private readonly System.Action _action;
@@ -50,13 +48,13 @@ namespace Acciaio
 			public void Cancel() => Stop(_routine);
 		}
 
-		private static StaticCoroutineRunner _runner;
+		private static MonoBehaviour _runner;
 
 		public static Coroutine Start(IEnumerator routine)
 		{
 			if (_runner == null)
 			{
-				_runner = new GameObject($"[{typeof(CoroutineRunner)}]").AddComponent<StaticCoroutineRunner>();
+				_runner = new GameObject($"[COROUTINE RUNNER]").AddComponent<MonoBehaviour>();
 				Object.DontDestroyOnLoad(_runner.gameObject);
 			}
 			_runner.gameObject.SetActive(true);

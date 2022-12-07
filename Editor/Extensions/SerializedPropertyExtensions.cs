@@ -47,7 +47,7 @@ namespace Acciaio.Editor
                 else
                 {
 					Type type = @object.GetType();
-					FieldInfo field = null;
+					FieldInfo field;
 					do
 					{
 						field = type.GetField(pathElement, INSTANCE_ANY);

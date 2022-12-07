@@ -5,12 +5,12 @@ using UnityEngine.UIElements;
 namespace Acciaio.Editor
 {
 	[CustomPropertyDrawer(typeof(DecoupledScene))]
-	public sealed class DecoupledSceneDrawer : UnityEditor.PropertyDrawer
+	public sealed class DecoupledSceneDrawer : PropertyDrawer
 	{
 		private readonly SceneAttributeDrawer _drawer = new();
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => 
-			_drawer.GetPropertyHeight(property.FindPropertyRelative("_scene"), label);
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) 
+            => _drawer.GetPropertyHeight(property.FindPropertyRelative("_scene"), label);
 
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
 		{

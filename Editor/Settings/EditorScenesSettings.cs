@@ -18,6 +18,37 @@ namespace Acciaio.Editor
 
         static EditorScenesSettings() => EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
+		private static void SetPlayModeStartScene(string scene)
+		{
+			SceneAsset asset = null;
+			if (!string.IsNullOrEmpty(scene))
+			{
+				var path = EditorBuildSettings.scenes.FirstOrDefault(s => s.path.EndsWith($"{scene}.unity"))?.path;
+				if (path == null)
+					Debug.LogError($"Scene {scene} is not present in build settings.");
+				else asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
+			}
+
+			EditorSceneManager.playModeStartScene = asset;
+		}
+
+		private static void OnPlayModeStateChanged(PlayModeStateChange change)
+		{
+			var settings = GetOrCreateSettings();
+			if (change == PlayModeStateChange.ExitingEditMode)
+			{
+				SetPlayModeStartScene(settings != null && settings._isActive ? settings._startupScene : null);
+
+				if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+				{
+					EditorApplication.isPlaying = false;
+					return;
+				}
+				EditorPrefs.SetString(EDITING_SCENE_PREFS_KEY, SceneManager.GetActiveScene().name);
+			}
+			else if (change == PlayModeStateChange.EnteredEditMode) EditorPrefs.DeleteKey(EDITING_SCENE_PREFS_KEY);
+		}
+
 		internal static EditorScenesSettings GetOrCreateSettings()
 		{
             static bool BuildPathIfNecessary()
@@ -55,37 +86,6 @@ namespace Acciaio.Editor
 		}
 
 		internal static SerializedObject GetSerializedSettings() => new(GetOrCreateSettings());
-
-		private static void SetPlayModeStartScene(string scene)
-		{
-			SceneAsset asset = null;
-			if (!string.IsNullOrEmpty(scene))
-			{
-				var path = EditorBuildSettings.scenes.FirstOrDefault(s => s.path.EndsWith($"{scene}.unity"))?.path;
-				if (path == null)
-					Debug.LogError($"Scene {scene} is not present in build settings.");
-				else asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
-			}
-
-			EditorSceneManager.playModeStartScene = asset;
-		}
-
-		private static void OnPlayModeStateChanged(PlayModeStateChange change)
-		{
-			var settings = GetOrCreateSettings();
-			if (change == PlayModeStateChange.ExitingEditMode)
-			{
-				SetPlayModeStartScene(settings != null && settings._isActive ? settings._startupScene : null);
-
-				if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-				{
-					EditorApplication.isPlaying = false;
-					return;
-				}
-				EditorPrefs.SetString(EDITING_SCENE_PREFS_KEY, SceneManager.GetActiveScene().name);
-			}
-			else if (change == PlayModeStateChange.EnteredEditMode) EditorPrefs.DeleteKey(EDITING_SCENE_PREFS_KEY);
-		}
 
 		[SerializeField]
 		private bool _isActive = false;

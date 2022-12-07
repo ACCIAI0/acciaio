@@ -23,7 +23,7 @@ namespace Acciaio.Editor
 			{
 				activateHandler = (searchContext, rootElement) =>
             	{
-					var editor = UnityEditor.Editor.CreateEditor(EditorScenesSettings.GetOrCreateSettings());
+					var editor = CreateEditor(EditorScenesSettings.GetOrCreateSettings());
 					rootElement.Add(editor.CreateInspectorGUI());
 				}
 			};
@@ -64,29 +64,25 @@ namespace Acciaio.Editor
 			popup.style.overflow = Overflow.Hidden;
 			popup.SetEnabled(isActive.boolValue);
 
-			popup.RegisterCallback<ChangeEvent<string>>(
-				evt =>
-				{
-					var value = evt.newValue;
-					if (value == NONE_VALUE) value = "";
-					startupScene.stringValue = value;
-					serializedObject.ApplyModifiedProperties();
-				}
-			);
+			popup.RegisterCallback<ChangeEvent<string>>(evt =>
+            {
+                var value = evt.newValue;
+                if (value == NONE_VALUE) value = "";
+                startupScene.stringValue = value;
+                serializedObject.ApplyModifiedProperties();
+            });
 
 			Toggle toggle = new()
 			{
 				value = isActive.boolValue
 			};
 
-			toggle.RegisterCallback<ChangeEvent<bool>>(
-				evt => 
-				{
-					isActive.boolValue = evt.newValue; 
-					popup.SetEnabled(isActive.boolValue);
-					serializedObject.ApplyModifiedProperties();
-				}
-			);
+			toggle.RegisterCallback<ChangeEvent<bool>>(evt => 
+            {
+                isActive.boolValue = evt.newValue; 
+                popup.SetEnabled(isActive.boolValue);
+                serializedObject.ApplyModifiedProperties();
+            });
 
 			container.Add(toggle);
 			container.Add(popup);

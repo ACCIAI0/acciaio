@@ -7,18 +7,18 @@ namespace Acciaio
 {
     public static class Enumerable
     {
-        private readonly static Random s_rng = new Random(DateTime.Now.Millisecond);
-        private readonly static RNGCryptoServiceProvider s_crng = new RNGCryptoServiceProvider();
+        private readonly static Random s_rng = new(DateTime.Now.Millisecond);
+        private readonly static RNGCryptoServiceProvider s_crng = new();
 
         private static IEnumerable<T> InternalRandomSample<T>(IEnumerable<T> e, int n, bool withRepetitions)
         {
-            if(n < 0)
+            if (n < 0)
                 throw new ArgumentException("Negative sample count in RandomSample");
-            if(n == 0 || e.IsEmpty() || (!withRepetitions && n > e.Count())) 
+            if (n == 0 || e.IsEmpty() || (!withRepetitions && n > e.Count())) 
                 yield break;
             var list = e.ToList();
             int start = 0;
-            for(int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++)
             {
                 int index = s_rng.Next(start, list.Count);
                 T element = list[index];
@@ -63,7 +63,7 @@ namespace Acciaio
         {
             bool isForward = from < to;
             int internalStep = (2 * Convert.ToInt32(isForward) - 1) * step;
-            for(int i = from; (isForward && i < to) || (!isForward && i > to); i += internalStep)
+            for (int i = from; (isForward && i < to) || (!isForward && i > to); i += internalStep)
                 yield return i;
         }
 #endregion
@@ -86,7 +86,7 @@ namespace Acciaio
         {
             bool isForward = from < to;
             long internalStep = (2 * Convert.ToInt32(isForward) - 1) * step;
-            for(long i = from; (isForward && i < to) || (!isForward && i > to); i += internalStep)
+            for (long i = from; (isForward && i < to) || (!isForward && i > to); i += internalStep)
                 yield return i;
         }
 #endregion
@@ -96,7 +96,7 @@ namespace Acciaio
         /// </summary>
         public static T RandomSample<T>(this IEnumerable<T> enumerable)
         {
-            if (enumerable.Count() == 0) return default(T);
+            if (enumerable.Count() == 0) return default;
             return enumerable.ElementAt(s_rng.Next(0, enumerable.Count()));
         }
 
@@ -130,12 +130,7 @@ namespace Acciaio
         public static IEnumerable<T> Shuffled<T>(this IEnumerable<T> enumerable) => InternalShuffle(enumerable, s_rng.Next);
 
         /// <summary>
-        /// Returns true if the given enumerable doesn't contain any element, false otherwise.
-        /// </summary>
-        public static bool IsEmpty<T>(this IEnumerable<T> enumerable) => !enumerable.GetEnumerator().MoveNext();
-
-        /// <summary>
-        /// Randomly reorders the enumerable using a crypto-random generator. It's slower than Shuffled, but 
+        /// Randomly reorders the enumerable using a crypto-random generator. It's slower than Shuffled and allocates memory, but 
         /// the resulting order of the elements is guaranteed to be true random. The resulting IEnumerable is eager
         /// evaluated.
         /// </summary>
@@ -143,15 +138,20 @@ namespace Acciaio
         {
             return InternalShuffle(enumerable, v => 
             {
-                byte[] bytes = new byte[sizeof(int)];
-                s_crng.GetBytes(bytes);
+                byte[] bytesBuffer = new byte[sizeof(int)];
+                s_crng.GetBytes(bytesBuffer);
 
                 //The most significant bit must be 0 so that the generated number is positive (an index).
-                bytes[bytes.Length - 1] &= 0b01111111; 
+                bytesBuffer[^1] &= 0b01111111; 
                 
-                return BitConverter.ToInt32(bytes, 0) % v;
+                return BitConverter.ToInt32(bytesBuffer, 0) % v;
             });
         }
+
+        /// <summary>
+        /// Returns true if the given enumerable doesn't contain any element, false otherwise.
+        /// </summary>
+        public static bool IsEmpty<T>(this IEnumerable<T> enumerable) => !enumerable.GetEnumerator().MoveNext();
         
         /// <summary>
         /// Pairs up elements from different IEnumerables on-to-one as Key-Value pairs. Given 2 enumerables of n elements 
@@ -167,15 +167,15 @@ namespace Acciaio
         {
             var enum1 = en1.GetEnumerator();
             var enum2 = en2.GetEnumerator();
-            while(enum1.MoveNext() && enum2.MoveNext())
+            while (enum1.MoveNext() && enum2.MoveNext())
                 yield return (enum1.Current, enum2.Current);
         }
 
         /// <summary>
         /// Allows to add IComparable elements to a list in an ordered manner.
         /// </summary>
-        public static void AddInOrder<T>(this List<T> list, T item) where T : IComparable<T> => 
-            AddInOrder<T>(list, Comparer<T>.Default, item);
+        public static void AddInOrder<T>(this List<T> list, T item) where T : IComparable<T> 
+            => AddInOrder(list, Comparer<T>.Default, item);
 
         /// <summary>
         /// Allows to add elements to a list in an ordered manner. T being generic,
@@ -183,7 +183,7 @@ namespace Acciaio
         /// </summary>
         public static void AddInOrder<T>(this List<T> list, IComparer<T> comparer, T item)
         {
-            if (list.Count == 0 || comparer.Compare(list[list.Count - 1], item) <= 0) 
+            if (list.Count == 0 || comparer.Compare(list[^1], item) <= 0) 
                 list.Add(item);
             else if (comparer.Compare(list[0], item) >= 0) 
                 list.Insert(0, item);
@@ -198,8 +198,8 @@ namespace Acciaio
         /// <summary>
         /// Allows to add IComparable elements to a linked list in an ordered manner.
         /// </summary>
-        public static void AddInOrder<T>(this LinkedList<T> list, T item) where T : IComparable<T> =>
-            AddInOrder(list, Comparer<T>.Default, item);
+        public static void AddInOrder<T>(this LinkedList<T> list, T item) where T : IComparable<T> 
+            => AddInOrder(list, Comparer<T>.Default, item);
 
         /// <summary>
         /// Allows to add elements to a linked list in an ordered manner. T being generic,
@@ -214,14 +214,14 @@ namespace Acciaio
             else if (comparer.Compare(item, list.First.Value) <= comparer.Compare(list.Last.Value, item))
             {
                 LinkedListNode<T> next = list.First.Next;
-                while(comparer.Compare(item, next.Value) > 0) 
+                while (comparer.Compare(item, next.Value) > 0) 
                     next = next.Next;
                 list.AddBefore(next, item);
             }
             else 
             {
                 LinkedListNode<T> previous = list.Last.Previous;
-                while(comparer.Compare(item, previous.Value) < 0) 
+                while (comparer.Compare(item, previous.Value) < 0) 
                     previous = previous.Previous;
                 list.AddAfter(previous, item);
             }
@@ -238,9 +238,7 @@ namespace Acciaio
                 throw new ArgumentOutOfRangeException(nameof(i));
             if (j < 0 || j >= list.Count)
                 throw new ArgumentOutOfRangeException(nameof(j));
-            object t = list[i];
-            list[i] = list[j];
-            list[j] = t;
+            (list[j], list[i]) = (list[i], list[j]);
         }
     }
 }

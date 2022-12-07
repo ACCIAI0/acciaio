@@ -23,5 +23,7 @@ namespace Acciaio
 		/// Shuts down the System. It's yieldable in coroutines.
 		/// </summary>
 		YieldInstruction Shutdown();
+
+        YieldInstruction AllSystemsReady();
 	}
 }

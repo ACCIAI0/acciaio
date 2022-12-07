@@ -7,8 +7,6 @@ namespace Acciaio
 	[DisallowMultipleComponent]
 	public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
 	{
-		private static bool systemIsShuttingDown;
-
 		public static T Instance { get; private set; }
 		public static bool Exists => Instance != null;
 

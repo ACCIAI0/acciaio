@@ -19,27 +19,41 @@ namespace Acciaio
 
 		private PubSubBoard GetOrCreate(string boardName)
 		{
-			if (!_boards.ContainsKey(boardName)) _boards.Add(boardName, new PubSubBoard());
+			if (!_boards.ContainsKey(boardName)) _boards.Add(boardName, new());
 			return _boards[boardName];
 		}
 
-		public void Subscribe<T>(string eventName, Action<T> subscription) =>
-				Global.Subscribe(eventName, subscription);
+        protected override IEnumerator RunRoutine()
+        {
+            Debug.Log("[Pub-Sub System] Online");
+			_isRunning = true;
+			yield break;
+        }
 
-		public void Subscribe<T>(string eventName, RefAction<T> subscription) =>
-				Global.Subscribe(eventName, subscription);
+        protected override IEnumerator ShutdownRoutine()
+        {
+            Debug.Log("[Pub-Sub System] Shutdown");
+			_isRunning = false;
+			yield break;
+        }
 
-        public void Subscribe(string eventName, Action subscription) =>
-				Global.Subscribe(eventName, subscription);
+		public void Subscribe<T>(string eventName, Action<T> subscription) 
+            => Global.Subscribe(eventName, subscription);
 
-        public bool Unsubscribe<T>(string eventName, Action<T> subscription) =>
-				Global.Unsubscribe(eventName, subscription);
+		public void Subscribe<T>(string eventName, RefAction<T> subscription) 
+            => Global.Subscribe(eventName, subscription);
 
-		public bool Unsubscribe<T>(string eventName, RefAction<T> subscription) =>
-				Global.Unsubscribe(eventName, subscription);
+        public void Subscribe(string eventName, Action subscription) 
+            => Global.Subscribe(eventName, subscription);
 
-        public void Unsubscribe(string eventName, Action subscription) =>
-				Global.Unsubscribe(eventName, subscription);
+        public bool Unsubscribe<T>(string eventName, Action<T> subscription) 
+            => Global.Unsubscribe(eventName, subscription);
+
+		public bool Unsubscribe<T>(string eventName, RefAction<T> subscription) 
+            => Global.Unsubscribe(eventName, subscription);
+
+        public void Unsubscribe(string eventName, Action subscription) 
+            => Global.Unsubscribe(eventName, subscription);
 
         public void Trigger<T>(string eventName, T args)
 		{
@@ -71,23 +85,23 @@ namespace Acciaio
 			Global.Trigger(eventName);
 		}
 
-		public void Subscribe<T>(string board, string eventName, Action<T> subscription) =>
-				GetOrCreate(board).Subscribe(eventName, subscription);
+		public void Subscribe<T>(string board, string eventName, Action<T> subscription) 
+            => GetOrCreate(board).Subscribe(eventName, subscription);
 
-		public void Subscribe<T>(string board, string eventName, RefAction<T> subscription) =>
-				GetOrCreate(board).Subscribe(eventName, subscription);
+		public void Subscribe<T>(string board, string eventName, RefAction<T> subscription)
+            => GetOrCreate(board).Subscribe(eventName, subscription);
 
-        public void Subscribe(string board, string eventName, Action subscription) =>
-				GetOrCreate(board).Subscribe(eventName, subscription);
+        public void Subscribe(string board, string eventName, Action subscription) 
+            => GetOrCreate(board).Subscribe(eventName, subscription);
 
-        public bool Unsubscribe<T>(string board, string eventName, Action<T> subscription) =>
-				GetOrCreate(board).Unsubscribe(eventName, subscription);
+        public bool Unsubscribe<T>(string board, string eventName, Action<T> subscription) 
+            => GetOrCreate(board).Unsubscribe(eventName, subscription);
 
-		public bool Unsubscribe<T>(string board, string eventName, RefAction<T> subscription) =>
-				GetOrCreate(board).Unsubscribe(eventName, subscription);
+		public bool Unsubscribe<T>(string board, string eventName, RefAction<T> subscription)
+            => GetOrCreate(board).Unsubscribe(eventName, subscription);
 
-        public void Unsubscribe(string board, string eventName, Action subscription) =>
-				GetOrCreate(board).Unsubscribe(eventName, subscription);
+        public void Unsubscribe(string board, string eventName, Action subscription)
+            => GetOrCreate(board).Unsubscribe(eventName, subscription);
 
         public void Trigger<T>(string board, string eventName, T args)
 		{
@@ -118,19 +132,5 @@ namespace Acciaio
 			}
 			GetOrCreate(board).Trigger(eventName);
 		}
-
-        protected override IEnumerator RunRoutine()
-        {
-            Debug.Log("[Pub-Sub System] Online");
-			_isRunning = true;
-			yield break;
-        }
-
-        protected override IEnumerator ShutdownRoutine()
-        {
-            Debug.Log("[Pub-Sub System] Shutdown");
-			_isRunning = false;
-			yield break;
-        }
     }
 }

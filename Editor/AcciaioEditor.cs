@@ -20,14 +20,14 @@ namespace Acciaio.Editor
 		public static IEnumerable<string> GetBuildSettingsScenes(bool includeEnabled = false) 
 		{
 			return EditorBuildSettings.scenes
-				.Where(s => s.enabled || includeEnabled)
-				.Select(s => System.IO.Path.GetFileNameWithoutExtension(s.path));
+                    .Where(s => s.enabled || includeEnabled)
+                    .Select(s => System.IO.Path.GetFileNameWithoutExtension(s.path));
 		}
 
 		public static string SceneField(Rect rect, string label, string value, bool allowEmpty, string emptyLabel)
 		{
 			var scenes = BuildScenesArrayForField(allowEmpty, emptyLabel);
-			var index = Mathf.Max(0, System.Array.IndexOf(scenes, value));
+			var index = Mathf.Max(0, Array.IndexOf(scenes, value));
 			var newIndex = EditorGUI.Popup(rect, label, index, scenes);
 			return allowEmpty && scenes[newIndex] == emptyLabel ? "" : scenes[newIndex];
 		}
@@ -43,7 +43,7 @@ namespace Acciaio.Editor
 		public static string SceneField(Rect rect, GUIContent label, string value, bool allowEmpty, string emptyLabel)
 		{
 			var scenes = BuildScenesArrayForField(allowEmpty, emptyLabel);
-			var index = Mathf.Max(0, System.Array.IndexOf(scenes, value));
+			var index = Mathf.Max(0, Array.IndexOf(scenes, value));
 			var newIndex = EditorGUI.Popup(rect, label, index, scenes.Select(s => new GUIContent(s)).ToArray());
 			return allowEmpty && scenes[newIndex] == emptyLabel ? "" : scenes[newIndex];
 		}
@@ -62,7 +62,7 @@ namespace Acciaio.Editor
 
 			if (scenes.Length == 0) return "";
 
-			var index = Mathf.Max(0, System.Array.IndexOf(scenes, value));
+			var index = Mathf.Max(0, Array.IndexOf(scenes, value));
 			var newIndex = EditorGUILayout.Popup(label, index, scenes);
 			return allowEmpty && scenes[newIndex] == emptyLabel ? "" : scenes[newIndex];
 		}
@@ -75,8 +75,12 @@ namespace Acciaio.Editor
 			return newIndex;
 		}
 
-		public static VisualElement CreateSceneField(string label, string value, bool allowEmpty, 
-			string emptyLabel, Action<string> onValueChanged)
+		public static VisualElement CreateSceneField(
+            string label, 
+            string value, 
+            bool allowEmpty, 
+            string emptyLabel, 
+            Action<string> onValueChanged)
 		{
 			string Display(string s) => allowEmpty && string.IsNullOrEmpty(s) ? emptyLabel : s;
 

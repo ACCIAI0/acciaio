@@ -10,8 +10,8 @@ namespace Acciaio.Editor
 	[CustomPropertyDrawer(typeof(SceneAttribute))]
 	public sealed class SceneAttributeDrawer : PropertyDrawer
 	{
-		public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => 
-				(!AcciaioEditor.GetBuildSettingsScenes().Any() ? 2 : 1) * EditorGUI.GetPropertyHeight(property.propertyType, label);
+		public override float GetPropertyHeight(SerializedProperty property, GUIContent label) 
+            => (!AcciaioEditor.GetBuildSettingsScenes().Any() ? 2 : 1) * EditorGUI.GetPropertyHeight(property.propertyType, label);
 
 		public void OnGUI(Rect rect, SerializedProperty property, GUIContent label, bool allowEmpty, string emptyLabel)
 		{

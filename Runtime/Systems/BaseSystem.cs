@@ -25,6 +25,15 @@ namespace Acciaio
 				Debug.LogWarning($"{GetType().Name}.Shutdown() was called but IsRunning is still true.");
 		}
 
+        /// <summary>
+		/// Subclasses should override this method to add logic for when all 
+        /// registered systems have been initialized;
+		/// </summary>
+        protected virtual IEnumerator OnAllSystemsReady()
+        {
+            yield break;
+        }
+
 		/// <summary>
 		/// Subclasses should override this method instead of the Awake method.
 		/// </summary>
@@ -58,5 +67,7 @@ namespace Acciaio
 			enabled = true;
 			return StartCoroutine(InternalShutdown());
 		}
+
+        public YieldInstruction AllSystemsReady() => StartCoroutine(OnAllSystemsReady());
 	}
 }

@@ -74,15 +74,15 @@ namespace Acciaio
 			if (!string.IsNullOrEmpty(loadingScene))
 				yield return SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
 
-			Scene loading = !string.IsNullOrEmpty(loadingScene) ? SceneManager.GetSceneByName(loadingScene) : new Scene();
+			Scene loading = !string.IsNullOrEmpty(loadingScene) ? SceneManager.GetSceneByName(loadingScene) : new();
 			ILoadingView view = null;
 			if (loading.IsValid())
 			{
 				SceneManager.SetActiveScene(loading);
 				yield return null;
 				view = loading.GetRootGameObjects()
-					.Select(go => go.GetComponent<ILoadingView>())
-					.FirstOrDefault(v => v != null);
+                        .Select(go => go.GetComponent<ILoadingView>())
+                        .FirstOrDefault(v => v != null);
 			}
 
 			yield return view?.Show();
