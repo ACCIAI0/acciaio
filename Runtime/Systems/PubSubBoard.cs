@@ -16,8 +16,8 @@ namespace Acciaio
     ///</summary>
     public sealed class PubSubBoard
     {
-        private static readonly Type VOID_TYPE = typeof(void);
-        private static readonly List<object> EMPTY_SUBS = new();
+        private static readonly Type VoidType = typeof(void);
+        private static readonly List<object> EmptySubs = new();
 
         private readonly Dictionary<string, List<object>> _subscribersByType = new();
         private readonly Dictionary<string, List<object>> _refSubscribersByType = new();
@@ -77,7 +77,7 @@ namespace Acciaio
         {
             var dict = isRef ? _refSubscribersByType : _subscribersByType;
             if (!dict.ContainsKey(key))
-                return EMPTY_SUBS;
+                return EmptySubs;
             return dict[key];
         }
 
@@ -98,7 +98,7 @@ namespace Acciaio
         ///Subscribes to the event of name eventName with the given callback with no arguments.
         ///</summary>
         public void Subscribe(string eventName, Action subscription) 
-            => Subscribe(BuildKey(eventName, VOID_TYPE), (object)subscription);
+            => Subscribe(BuildKey(eventName, VoidType), (object)subscription);
 
         ///<summary>
         ///Removes a subscription to the event of name eventName.
@@ -116,14 +116,14 @@ namespace Acciaio
         ///Removes a subscription to the event of name eventName.
         ///</summary>
         public void Unsubscribe(string eventName, Action subscription) 
-            => Unsubscribe(BuildKey(eventName, VOID_TYPE), (object)subscription);
+            => Unsubscribe(BuildKey(eventName, VoidType), (object)subscription);
         
         ///<summary>
         ///Triggers the event of name eventName, thus calling sequentially all subscribed callbacks with no arguments.
         ///</summary>
         public void Trigger(string eventName)
         {
-            var subs = RetrieveSubs(BuildKey(eventName, VOID_TYPE), false)
+            var subs = RetrieveSubs(BuildKey(eventName, VoidType), false)
                 .Cast<Action>()
                 .ToList();
             foreach (var sub in subs) sub();

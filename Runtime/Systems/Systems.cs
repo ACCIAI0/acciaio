@@ -9,8 +9,6 @@ namespace Acciaio
 {
 	public static class Systems
 	{
-		public const string SCENE_NAME = "Systems";
-
         private class SystemOperation : CustomYieldInstruction
         {
 			private readonly AsyncOperation _op;
@@ -53,6 +51,8 @@ namespace Acciaio
 				callback?.Invoke(Ready);
 			}
         }
+        
+		public const string SCENE_NAME = "Systems";
 
 		private static readonly Dictionary<Type, ISystem> _systems = new();
 

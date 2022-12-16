@@ -7,8 +7,8 @@ namespace Acciaio
 {
     public static class Enumerable
     {
-        private readonly static Random s_rng = new(DateTime.Now.Millisecond);
-        private readonly static RNGCryptoServiceProvider s_crng = new();
+        private readonly static Random rng = new(DateTime.Now.Millisecond);
+        private readonly static RNGCryptoServiceProvider crypto = new();
 
         private static IEnumerable<T> InternalRandomSample<T>(IEnumerable<T> e, int n, bool withRepetitions)
         {
@@ -16,19 +16,18 @@ namespace Acciaio
                 throw new ArgumentException("Negative sample count in RandomSample");
             if (n == 0 || e.IsEmpty() || (!withRepetitions && n > e.Count())) 
                 yield break;
+            
             var list = e.ToList();
-            int start = 0;
-            for (int i = 0; i < n; i++)
+            for (int i = 0, start = 0; i < n; i++)
             {
-                int index = s_rng.Next(start, list.Count);
+                int index = rng.Next(start, list.Count);
                 T element = list[index];
                 if(!withRepetitions) list.Swap(start++, index);
                 yield return element;
-
             }
         }
 
-        private static IEnumerable<T> InternalShuffle<T>(IEnumerable<T> enumerable, Func<int, int> randomSupplier)
+        private static IEnumerable<T> InternalShuffled<T>(IEnumerable<T> enumerable, Func<int, int> randomSupplier)
         {
             var shuffled = new List<T>();
             foreach (T v in enumerable)
@@ -97,12 +96,13 @@ namespace Acciaio
         public static T RandomSample<T>(this IEnumerable<T> enumerable)
         {
             if (enumerable.Count() == 0) return default;
-            return enumerable.ElementAt(s_rng.Next(0, enumerable.Count()));
+            return enumerable.ElementAt(rng.Next(0, enumerable.Count()));
         }
 
         /// <summery>
         /// Returns an IEnumerable of n random elements from the given enumerable. If the withRepetitions flag is false it guarantees that 
         /// the returned IEnumerable won't contain duplicates if and only if the original enumerable doesn't contain duplicates.
+        /// Allocates memory proportionally to the size of enumerable.
         /// </summary>
         public static IEnumerable<T> RandomSample<T>(this IEnumerable<T> enumerable, int n, bool withRepetitions = false)
         {
@@ -112,6 +112,7 @@ namespace Acciaio
         /// <summery>
         /// Returns an IEnumerable of n random elements from the given enumerable. It will contain maxOccurrences occurrences or less
         /// of any single element if and only if the given element occurs only once in the original enumerable.
+        /// Allocates memory proportionally to the size of enumerable.
         /// </summary>
         public static IEnumerable<T> RandomSample<T>(this IEnumerable<T> enumerable, int n, int maxOccurences)
         {
@@ -127,7 +128,7 @@ namespace Acciaio
         /// Randomly reaorders the enumerable using pseudo-random generation. It's faster than FineShuffled. The resulting IEnumerable 
         /// is eager evaluated.
         /// </summary>
-        public static IEnumerable<T> Shuffled<T>(this IEnumerable<T> enumerable) => InternalShuffle(enumerable, s_rng.Next);
+        public static IEnumerable<T> Shuffled<T>(this IEnumerable<T> enumerable) => InternalShuffled(enumerable, rng.Next);
 
         /// <summary>
         /// Randomly reorders the enumerable using a crypto-random generator. It's slower than Shuffled and allocates memory, but 
@@ -136,10 +137,10 @@ namespace Acciaio
         /// </summary>
         public static IEnumerable<T> FineShuffled<T>(this IEnumerable<T> enumerable)
         {
-            return InternalShuffle(enumerable, v => 
+            return InternalShuffled(enumerable, v => 
             {
                 byte[] bytesBuffer = new byte[sizeof(int)];
-                s_crng.GetBytes(bytesBuffer);
+                crypto.GetBytes(bytesBuffer);
 
                 //The most significant bit must be 0 so that the generated number is positive (an index).
                 bytesBuffer[^1] &= 0b01111111; 

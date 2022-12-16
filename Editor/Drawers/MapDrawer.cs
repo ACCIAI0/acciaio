@@ -65,7 +65,7 @@ namespace Acciaio.Collections.Generic.Editor
                     var key = entry.FindPropertyRelative(KEY_NAME);
                     var value = entry.FindPropertyRelative(VALUE_NAME);
 
-                    string keyName = names?.KeyName ?? MapNamesAttribute.DEFAULT_KEY;
+                    string keyName = names?.KeyName ?? MapNamesAttribute.DefaultKey;
                     string keyTooltip = "";
 
                     bool isNullKey = key.propertyType == SerializedPropertyType.ObjectReference && key.objectReferenceValue == null;
@@ -86,7 +86,7 @@ namespace Acciaio.Collections.Generic.Editor
 
                     var valueRect = new Rect(rect.x, keyRect.y + keyRect.height, rect.width,
                         EditorGUI.GetPropertyHeight(value, true));
-                    EditorGUI.PropertyField(valueRect, value, new GUIContent(names?.ValueName ?? MapNamesAttribute.DEFAULT_VALUE), true);
+                    EditorGUI.PropertyField(valueRect, value, new GUIContent(names?.ValueName ?? MapNamesAttribute.DefaultValue), true);
                 },
                 onAddCallback = list =>
                 {
