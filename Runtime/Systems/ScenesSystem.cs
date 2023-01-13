@@ -17,10 +17,6 @@ namespace Acciaio
     {
 		public sealed class SceneOperation : CustomYieldInstruction
 		{
-			private static SceneOperation Create(ScenesSystem system, IEnumerator routine) => new(system, routine);
-
-			public static void PrepareType() => createOperation = Create;
-
 			public event Action<SceneOperation> Completed;
 
 			private readonly ScenesSystem _system;
@@ -29,7 +25,7 @@ namespace Acciaio
 
 			public override bool keepWaiting => _keepWaiting;
 
-			private SceneOperation(ScenesSystem system, IEnumerator routine)
+			internal SceneOperation(ScenesSystem system, IEnumerator routine)
 			{
 				_system = system;
 				_system.StartCoroutine(Internal(routine));
@@ -37,16 +33,14 @@ namespace Acciaio
 
 			private IEnumerator Internal(IEnumerator routine)
 			{
-				yield return _system.StartCoroutine(routine);
+				while (routine.MoveNext()) yield return routine.Current;
 				if (_system._operation == this) _system._operation = null;
 				_keepWaiting = false;
 				Completed?.Invoke(this);
 			}
-		}
 
-		private static Func<ScenesSystem, IEnumerator, SceneOperation> createOperation = default;
-
-        static ScenesSystem() => SceneOperation.PrepareType();
+            public YieldInstruction HideCurrentLoadingView() => _system.HideCurrentLoadingView();
+        }
 
         [Header("Scenes System")]
 		[SerializeField, Scene("-")]
@@ -60,32 +54,48 @@ namespace Acciaio
 		
 		private bool _isRunning;
 		private SceneOperation _operation;
+		private ILoadingView _currentLoadingView;
 
         public override bool IsRunning => _isRunning;
 
 		public Scene ActiveScene => SceneManager.GetActiveScene();
 
-		private IEnumerator LoadSceneCo(string scene, bool useAddressables, string loadingScene)
+		private IEnumerator HideLoadingViewCo()
+		{
+			if (_currentLoadingView == null) yield break;
+			yield return _currentLoadingView.Hide();
+			yield return SceneManager.UnloadSceneAsync(_currentLoadingView.Scene);
+			_currentLoadingView = null;
+		}
+
+		private IEnumerator LoadSceneCo(string scene, bool useAddressables, string loadingScene, bool autoHideLoadingView)
 		{
 			var toUnload = SceneManager.GetActiveScene();
 
 			if (string.IsNullOrEmpty(loadingScene)) loadingScene = _defaultLoadingScene;
 
 			if (!string.IsNullOrEmpty(loadingScene))
-				yield return SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
+			{
+				if (_currentLoadingView != null && _currentLoadingView.Scene.name.Equals(loadingScene, StringComparison.Ordinal))
+				{
+					SceneManager.UnloadSceneAsync(_currentLoadingView.Scene);
+					_currentLoadingView = null;
+				}
+				if (_currentLoadingView == null) 
+					yield return SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
+			}
 
 			Scene loading = !string.IsNullOrEmpty(loadingScene) ? SceneManager.GetSceneByName(loadingScene) : new();
-			ILoadingView view = null;
 			if (loading.IsValid())
 			{
 				SceneManager.SetActiveScene(loading);
 				yield return null;
-				view = loading.GetRootGameObjects()
+				_currentLoadingView ??= loading.GetRootGameObjects()
                         .Select(go => go.GetComponent<ILoadingView>())
                         .FirstOrDefault(v => v != null);
 			}
 
-			yield return view?.Show();
+			yield return _currentLoadingView?.Show();
 
 #if USE_ADDRESSABLES
 			if (toUnload == _loadedAddressablesScene.Scene) 
@@ -114,10 +124,10 @@ namespace Acciaio
 			}
 #endif
 
-			if (loading.IsValid())
+			if (autoHideLoadingView)
 			{
-				yield return view?.Hide();
-				SceneManager.UnloadSceneAsync(loadingScene);
+				IEnumerator hideLoadingRoutine = HideLoadingViewCo();
+				while (hideLoadingRoutine.MoveNext()) yield return hideLoadingRoutine.Current;
 			}
 		}
 
@@ -151,19 +161,24 @@ namespace Acciaio
 			yield break;
         }
 
-		public SceneOperation LoadScene(string scene) => LoadScene(scene, null);
+		public SceneOperation LoadScene(string scene, bool autoHideLoadingView = true) 
+			=> LoadScene(scene, null, autoHideLoadingView);
 
-		public SceneOperation LoadScene(string scene, string loadingScene) => LoadScene(scene, false, loadingScene);
+		public SceneOperation LoadScene(string scene, string loadingScene, bool autoHideLoadingView = true) 
+			=> LoadScene(scene, false, loadingScene, autoHideLoadingView);
 
 #if USE_ADDRESSABLES
-		public SceneOperation LoadAddressableScene(string scenePath) => LoadAddressableScene(scenePath, null);
+		public SceneOperation LoadAddressableScene(string scenePath, bool autoHideLoadingView = true) 
+			=> LoadAddressableScene(scenePath, null, autoHideLoadingView);
 
-		public SceneOperation LoadAddressableScene(string scenePath, string loadingScene) => LoadScene(scenePath, true, loadingScene);
+		public SceneOperation LoadAddressableScene(string scenePath, string loadingScene, bool autoHideLoadingView = true) 
+			=> LoadScene(scenePath, true, loadingScene, autoHideLoadingView);
 #endif
 
-		public SceneOperation LoadScene(string scene, bool useAddressables) => LoadScene(scene, useAddressables, null);
+		public SceneOperation LoadScene(string scene, bool useAddressables, bool autoHideLoadingView = true) 
+			=> LoadScene(scene, useAddressables, null, autoHideLoadingView);
 
-		public SceneOperation LoadScene(string scene, bool useAddressables, string loadingScene)
+		public SceneOperation LoadScene(string scene, bool useAddressables, string loadingScene, bool autoHideLoadingView = true)
 		{
 			if (!IsRunning)
 			{
@@ -174,7 +189,7 @@ namespace Acciaio
 			if (_operation != null)
 				throw new InvalidOperationException("A scene is already being loaded, cannot load another one");
 
-			_operation = createOperation(this, LoadSceneCo(scene, useAddressables, loadingScene));
+			_operation = new(this, LoadSceneCo(scene, useAddressables, loadingScene, autoHideLoadingView));
 			return _operation;
 		}
 
@@ -192,7 +207,7 @@ namespace Acciaio
 				return null;
 			}
 
-			return createOperation(this, AddSceneCo(scene, useAddressables));
+			return new(this, AddSceneCo(scene, useAddressables));
 		}
 
 		public void RemoveScene(string sceneName)
@@ -222,5 +237,7 @@ namespace Acciaio
 		}
 
 		public Scene GetSceneByName(string name) => SceneManager.GetSceneByName(name);
+
+		public YieldInstruction HideCurrentLoadingView() => StartCoroutine(HideLoadingViewCo());
     }
 }

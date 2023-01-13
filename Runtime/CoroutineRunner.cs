@@ -5,6 +5,8 @@ namespace Acciaio
 {
 	public static class CoroutineRunner
 	{
+		private sealed class Runner : MonoBehaviour { }
+
 		private sealed class DelayedAction : CancelableDelay
 		{
 			private readonly System.Action _action;
@@ -54,7 +56,7 @@ namespace Acciaio
 		{
 			if (_runner == null)
 			{
-				_runner = new GameObject($"[COROUTINE RUNNER]").AddComponent<MonoBehaviour>();
+				_runner = new GameObject($"[COROUTINE RUNNER]").AddComponent<Runner>();
 				Object.DontDestroyOnLoad(_runner.gameObject);
 			}
 			_runner.gameObject.SetActive(true);

@@ -56,7 +56,7 @@ namespace Acciaio.Editor
 
 			var scenes = AcciaioEditor.BuildScenesArrayForField(true, NONE_VALUE).ToList();
 			var defaultValue = startupScene.stringValue;
-			if (string.IsNullOrEmpty(defaultValue)) defaultValue = NONE_VALUE;
+			if (string.IsNullOrEmpty(defaultValue) || !scenes.Contains(defaultValue)) defaultValue = NONE_VALUE;
 
 			PopupField<string> popup = new("Editor Startup Scene", scenes, defaultValue);
 			popup.style.flexGrow = 1;
@@ -86,6 +86,7 @@ namespace Acciaio.Editor
 
 			container.Add(toggle);
 			container.Add(popup);
+			
 			rootElement.Add(title);
 			rootElement.Add(new Label());
 			rootElement.Add(container);
