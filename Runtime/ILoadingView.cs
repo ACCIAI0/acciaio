@@ -9,4 +9,9 @@ namespace Acciaio
 		public YieldInstruction Show();
 		public YieldInstruction Hide();
 	}
+
+    public interface IProgressLoadingView : ILoadingView
+	{
+		public float CurrentProgress { get; set; }
+	}
 }
