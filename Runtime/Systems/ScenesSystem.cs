@@ -97,28 +97,69 @@ namespace Acciaio
 
 			yield return _currentLoadingView?.Show();
 
+            IProgressLoadingView progressLoadingView = _currentLoadingView as IProgressLoadingView;
+
 #if USE_ADDRESSABLES
 			if (toUnload == _loadedAddressablesScene.Scene) 
 			{
-				yield return Addressables.UnloadSceneAsync(_loadedAddressablesScene);
+				var unloadOperation = Addressables.UnloadSceneAsync(_loadedAddressablesScene);
+                if (progressLoadingView == null) yield return unloadOperation;
+                else
+                {
+                    while (!unloadOperation.IsDone)
+                    {
+                        progressLoadingView.CurrentProgress = unloadOperation.PercentComplete / 2;
+                        yield return null;
+                    }
+                }
 				_loadedAddressablesScene = default;
 			}
 			else
+            {
 #endif 
-				yield return SceneManager.UnloadSceneAsync(toUnload.name);
+				var unloadOperation = SceneManager.UnloadSceneAsync(toUnload.name);
+                if (progressLoadingView == null) yield return unloadOperation;
+                else
+                {
+                    while (!unloadOperation.isDone)
+                    {
+                        progressLoadingView.CurrentProgress = unloadOperation.progress / 2;
+                        yield return null;
+                    }
+                }
+#if USE_ADDRESSABLES
+			}
+#endif
 
 #if USE_ADDRESSABLES
 			if (useAddressables)
 			{
-				var handle = Addressables.LoadSceneAsync(scene, LoadSceneMode.Additive);
-				yield return handle;
-				SceneManager.SetActiveScene(handle.Result.Scene);
-				_loadedAddressablesScene = handle.Result;
+				var loadOperation = Addressables.LoadSceneAsync(scene, LoadSceneMode.Additive);
+                if (progressLoadingView == null) yield return loadOperation;
+                else
+                {
+                    while (!loadOperation.IsDone)
+                    {
+                        progressLoadingView.CurrentProgress = .5f + loadOperation.PercentComplete / 2;
+                        yield return null;
+                    }
+                }
+				SceneManager.SetActiveScene(loadOperation.Result.Scene);
+				_loadedAddressablesScene = loadOperation.Result;
 			}
 			else
 			{
 #endif
-				yield return SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+				var loadOperation = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+                if (progressLoadingView == null) yield return loadOperation;
+                else
+                {
+                    while (!loadOperation.isDone)
+                    {
+                        progressLoadingView.CurrentProgress = .5f + loadOperation.progress / 2;
+                        yield return null;
+                    }
+                }
 				SceneManager.SetActiveScene(SceneManager.GetSceneByName(scene));
 #if USE_ADDRESSABLES
 			}
