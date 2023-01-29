@@ -2,27 +2,31 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using JetBrains.Annotations;
 
-namespace Acciaio
+namespace Acciaio.Collections
 {
     public static class Enumerable
     {
-        private readonly static Random rng = new(DateTime.Now.Millisecond);
-        private readonly static RNGCryptoServiceProvider crypto = new();
+        private static readonly Random Rng = new(DateTime.Now.Millisecond);
+        private static readonly RNGCryptoServiceProvider Crypto = new();
 
         private static IEnumerable<T> InternalRandomSample<T>(IEnumerable<T> e, int n, bool withRepetitions)
         {
             if (n < 0)
                 throw new ArgumentException("Negative sample count in RandomSample");
-            if (n == 0 || e.IsEmpty() || (!withRepetitions && n > e.Count())) 
-                yield break;
             
+            if (n == 0 || e.IsEmpty())
+                yield break;
             var list = e.ToList();
+            if (!withRepetitions && n > list.Count)
+                yield break;
+
             for (int i = 0, start = 0; i < n; i++)
             {
-                int index = rng.Next(start, list.Count);
+                int index = Rng.Next(start, list.Count);
                 T element = list[index];
-                if(!withRepetitions) list.Swap(start++, index);
+                if (!withRepetitions) list.Swap(start++, index);
                 yield return element;
             }
         }
@@ -45,10 +49,12 @@ namespace Acciaio
         }
 
 #region Int Range
-        ///<summary>
-        /// Builds an enumerable of int values ranging from 0 (inclusive) to 'to' (exclusive), using increments of length 'step' (default 1).
-        ///</summary>
-        ///<param name="to">the exclusive end of the range</param>
+
+        /// <summary>
+        ///  Builds an enumerable of int values ranging from 0 (inclusive) to 'to' (exclusive), using increments of length 'step' (default 1).
+        /// </summary>
+        /// <param name="to">the exclusive end of the range</param>
+        /// <param name="step">the non-negative step increment to use</param>
         public static IEnumerable<int> Range(int to, ushort step = 1) => Range(0, to, step);
 
         /// <summary>
@@ -72,6 +78,7 @@ namespace Acciaio
         /// Builds an enumerable of long values ranging from 0 (inclusive) to 'to' (exclusive), using unary increments.
         /// </summary>
         /// <param name="to">the exclusive end of the range</param>
+        /// <param name="step">the non-negative step increment to use</param>
         public static IEnumerable<long> Range(long to, uint step = 1) => Range(0, to, step);
 
         /// <summary>
@@ -90,13 +97,12 @@ namespace Acciaio
         }
 #endregion
 
-        /// <summery>
+        /// <summary>
         /// Returns one random element from the given enumerable or default(T) if it is empty.
         /// </summary>
         public static T RandomSample<T>(this IEnumerable<T> enumerable)
         {
-            if (enumerable.Count() == 0) return default;
-            return enumerable.ElementAt(rng.Next(0, enumerable.Count()));
+            return enumerable.Any() ? default : enumerable.ElementAt(Rng.Next(0, enumerable.Count()));
         }
 
         /// <summery>
@@ -128,7 +134,7 @@ namespace Acciaio
         /// Randomly reaorders the enumerable using pseudo-random generation. It's faster than FineShuffled. The resulting IEnumerable 
         /// is eager evaluated.
         /// </summary>
-        public static IEnumerable<T> Shuffled<T>(this IEnumerable<T> enumerable) => InternalShuffled(enumerable, rng.Next);
+        public static IEnumerable<T> Shuffled<T>(this IEnumerable<T> enumerable) => InternalShuffled(enumerable, Rng.Next);
 
         /// <summary>
         /// Randomly reorders the enumerable using a crypto-random generator. It's slower than Shuffled and allocates memory, but 
@@ -140,7 +146,7 @@ namespace Acciaio
             return InternalShuffled(enumerable, v => 
             {
                 byte[] bytesBuffer = new byte[sizeof(int)];
-                crypto.GetBytes(bytesBuffer);
+                Crypto.GetBytes(bytesBuffer);
 
                 //The most significant bit must be 0 so that the generated number is positive (an index).
                 bytesBuffer[^1] &= 0b01111111; 
@@ -214,14 +220,14 @@ namespace Acciaio
                 list.AddFirst(item);
             else if (comparer.Compare(item, list.First.Value) <= comparer.Compare(list.Last.Value, item))
             {
-                LinkedListNode<T> next = list.First.Next;
+                var next = list.First.Next;
                 while (comparer.Compare(item, next.Value) > 0) 
                     next = next.Next;
                 list.AddBefore(next, item);
             }
             else 
             {
-                LinkedListNode<T> previous = list.Last.Previous;
+                var previous = list.Last.Previous;
                 while (comparer.Compare(item, previous.Value) < 0) 
                     previous = previous.Previous;
                 list.AddAfter(previous, item);

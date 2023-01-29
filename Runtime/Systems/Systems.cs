@@ -37,24 +37,24 @@ namespace Acciaio
 							.Where(system => system != null)
 							.OrderBy(system => system.Priority)
 							.ToList();
-					systems.ForEach(system => _systems.Add(system.GetType(), system));
+					systems.ForEach(system => Systems.SystemsDictionary.Add(system.GetType(), system));
 					CoroutineRunner.Start(Coroutine(systems, callback));
 				};
 			}
 
-			private IEnumerator Coroutine(IEnumerable<ISystem> systems, Action<bool> callback)
+			private IEnumerator Coroutine(List<ISystem> systems, Action<bool> callback)
 			{
-				foreach (var s in systems)
-					yield return s.Run();
+				foreach (var system in systems)
+					yield return system.Run();
 				_keepWaiting = false;
 				Ready = true;
 				callback?.Invoke(Ready);
 			}
         }
         
-		public const string SCENE_NAME = "Systems";
+		public const string SceneName = "Systems";
 
-		private static readonly Dictionary<Type, ISystem> _systems = new();
+		private static readonly Dictionary<Type, ISystem> SystemsDictionary = new();
 
 		public static Scene ActiveSystemsScene { get; private set; }
 		public static bool Ready { get; private set; }
@@ -62,7 +62,7 @@ namespace Acciaio
 		/// <summary>
 		/// Initializes the Systems architecture. To wait for the operations to complete, yield on this call in a coroutine.
 		/// </summary>
-		public static CustomYieldInstruction Load(Action<bool> callback = null) => Load(SCENE_NAME, callback);
+		public static CustomYieldInstruction Load(Action<bool> callback = null) => Load(SceneName, callback);
 
 		/// <summary>
 		/// Initializes the Systems architecture with the specified Systems scene name.
@@ -85,7 +85,7 @@ namespace Acciaio
 		public static T GetSystem<T>() where T : ISystem
 		{
 			if (!Ready) throw new InvalidOperationException("Systems are not Ready. Ensure Load() has been called before this.");
-			return (T)_systems[typeof(T)];
+			return (T)SystemsDictionary[typeof(T)];
 		}
 
 		/// <summary>
@@ -102,7 +102,7 @@ namespace Acciaio
 				return false;
 			}
 
-			var result = _systems.TryGetValue(typeof(T), out ISystem s);
+			var result = SystemsDictionary.TryGetValue(typeof(T), out var s);
 			system = (T)s;
 			return result;
 		}

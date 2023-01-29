@@ -124,11 +124,9 @@ namespace Acciaio
 			}
 #endif
 
-			if (autoHideLoadingView)
-			{
-				IEnumerator hideLoadingRoutine = HideLoadingViewCo();
-				while (hideLoadingRoutine.MoveNext()) yield return hideLoadingRoutine.Current;
-			}
+			if (!autoHideLoadingView) yield break;
+			IEnumerator hideLoadingRoutine = HideLoadingViewCo();
+			while (hideLoadingRoutine.MoveNext()) yield return hideLoadingRoutine.Current;
 		}
 
 		private IEnumerator AddSceneCo(string scene, bool useAddressables)
@@ -175,7 +173,7 @@ namespace Acciaio
 			=> LoadScene(scenePath, true, loadingScene, autoHideLoadingView);
 #endif
 
-		public SceneOperation LoadScene(string scene, bool useAddressables, bool autoHideLoadingView = true) 
+		public SceneOperation LoadScene(string scene, bool useAddressables, bool autoHideLoadingView) 
 			=> LoadScene(scene, useAddressables, null, autoHideLoadingView);
 
 		public SceneOperation LoadScene(string scene, bool useAddressables, string loadingScene, bool autoHideLoadingView = true)
@@ -212,8 +210,8 @@ namespace Acciaio
 
 		public void RemoveScene(string sceneName)
 		{
-			Scene scene = SceneManager.GetSceneByName(sceneName);
-			Scene active = SceneManager.GetActiveScene();
+			var scene = SceneManager.GetSceneByName(sceneName);
+			var active = SceneManager.GetActiveScene();
 
 			if (scene == active) Debug.LogWarning($"Removing active scene {sceneName}.");
 

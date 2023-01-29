@@ -2,23 +2,24 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Acciaio.Editor
 {
     public static class AcciaioMenuItems
     {
-        private const string SYSTEMS_SCENE_PATH_FORMAT = "Assets/_Scenes/{0}.unity";
+        private const string SystemsScenePathFormat = "Assets/_Scenes/{0}.unity";
 
         private static bool AssetExists<T>(string path) where T : Object 
             => AssetDatabase.LoadAssetAtPath<T>(path) != null;
 
-        [MenuItem("Tools/Acciaio/Create Firestart Systems Scene", false, 51)]
+        [MenuItem("Tools/Acciaio/Create Systems Scene", false, 51)]
         public static void CreateSystemsScene()
         {
             if (!AssetDatabase.IsValidFolder("Assets/_Scenes"))
                 AssetDatabase.CreateFolder("Assets", "_Scenes");
                 
-            string systemsScenePath = string.Format(SYSTEMS_SCENE_PATH_FORMAT, Systems.SCENE_NAME);
+            var systemsScenePath = string.Format(SystemsScenePathFormat, Systems.SceneName);
             if (!AssetExists<SceneAsset>(systemsScenePath))
             {
                 if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -30,10 +31,10 @@ namespace Acciaio.Editor
                 var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
                 var go = new GameObject("ScenesSystem", typeof(ScenesSystem));
-                EditorSceneManager.MoveGameObjectToScene(go, scene);
+                SceneManager.MoveGameObjectToScene(go, scene);
 
                 go = new GameObject("PubSubSystem", typeof(PubSubSystem));
-                EditorSceneManager.MoveGameObjectToScene(go, scene);
+                SceneManager.MoveGameObjectToScene(go, scene);
 
                 EditorSceneManager.SaveScene(scene, systemsScenePath);
 

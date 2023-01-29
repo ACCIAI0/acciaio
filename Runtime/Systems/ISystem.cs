@@ -15,12 +15,12 @@ namespace Acciaio
 		bool IsRunning { get; }
 
 		/// <summary>
-		/// Starts up the System. It's yieldable in coroutines.
+		/// Starts up the System. It can be yielded in coroutines.
 		/// </summary>
 		YieldInstruction Run();
 
 		/// <summary>
-		/// Shuts down the System. It's yieldable in coroutines.
+		/// Shuts down the System. It can be yielded in coroutines.
 		/// </summary>
 		YieldInstruction Shutdown();
 

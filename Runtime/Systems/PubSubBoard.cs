@@ -12,30 +12,35 @@ namespace Acciaio
     ///main Hub which event publishers and events subscribers refer to. Here, subscribers
     ///can subscribe for certain events by specifying their name and - if any - their
     ///arguments type. Publishers can trigger events by name and let the Hub notify all
-    ///those which subscribed to it. This functionality is NOT threadsafe.
+    ///those which subscribed to it. This functionality is NOT thread-safe.
     ///</summary>
     public sealed class PubSubBoard
     {
         private static readonly Type VoidType = typeof(void);
         private static readonly List<object> EmptySubs = new();
+        private static readonly StringBuilder KeyBuilder = new();
 
-        private readonly Dictionary<string, List<object>> _subscribersByType = new();
-        private readonly Dictionary<string, List<object>> _refSubscribersByType = new();
-
-        private string BuildKey(string eventName, Type type)
+        private static string BuildKey(string eventName, Type type)
         {
-            var builder = new StringBuilder("<")
+            var result = KeyBuilder
+                    .Append('<')
                     .Append(eventName)
                     .Append(">__")
-                    .Append(type.FullName);
-            return builder.ToString();
+                    .Append(type.FullName)
+                    .ToString();
+            KeyBuilder.Clear();
+            return result;
         }
+
+        private readonly Dictionary<string, List<object>> _subscribersByType = new();
+
+        private readonly Dictionary<string, List<object>> _refSubscribersByType = new();
 
         private void Subscribe(string key, object subscriptionAsObject)
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException(nameof(subscriptionAsObject), "Cannot accept null subscriptions");
-            if (!_subscribersByType.TryGetValue(key, out List<object> subs))
+            if (!_subscribersByType.TryGetValue(key, out var subs))
             {
                 subs = new List<object>();
                 _subscribersByType.Add(key, subs);
@@ -47,7 +52,7 @@ namespace Acciaio
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException(nameof(subscriptionAsObject), "Cannot accept null subscriptions");
-            if (!_refSubscribersByType.TryGetValue(key, out List<object> subs))
+            if (!_refSubscribersByType.TryGetValue(key, out var subs))
             {
                 subs = new List<object>();
                 _refSubscribersByType.Add(key, subs);
@@ -59,26 +64,20 @@ namespace Acciaio
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException(nameof(subscriptionAsObject), "Cannot unsubscribe null subscriptions");
-            if (!_subscribersByType.TryGetValue(key, out List<object> subs))
-                return false;
-            return subs.Remove(subscriptionAsObject);
+            return _subscribersByType.TryGetValue(key, out var subs) && subs.Remove(subscriptionAsObject);
         }
 
         private bool RefUnsubscribe(string key, object subscriptionAsObject)
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException(nameof(subscriptionAsObject), "Cannot unsubscribe null subscriptions");
-            if (!_refSubscribersByType.TryGetValue(key, out List<object> subs))
-                return false;
-            return subs.Remove(subscriptionAsObject);
+            return _refSubscribersByType.TryGetValue(key, out var subs) && subs.Remove(subscriptionAsObject);
         }
 
-        private List<object> RetrieveSubs(string key, bool isRef) 
+        private IEnumerable<object> RetrieveSubs(string key, bool isRef) 
         {
             var dict = isRef ? _refSubscribersByType : _subscribersByType;
-            if (!dict.ContainsKey(key))
-                return EmptySubs;
-            return dict[key];
+            return !dict.ContainsKey(key) ? EmptySubs : dict[key];
         }
 
         ///<summary>
@@ -124,8 +123,8 @@ namespace Acciaio
         public void Trigger(string eventName)
         {
             var subs = RetrieveSubs(BuildKey(eventName, VoidType), false)
-                .Cast<Action>()
-                .ToList();
+                    .Cast<Action>()
+                    .ToList();
             foreach (var sub in subs) sub();
         }
 
@@ -147,8 +146,8 @@ namespace Acciaio
         public void Trigger<T>(string eventName, ref T args)
         {
             var subs = RetrieveSubs(BuildKey(eventName, typeof(T)), true)
-                .Cast<RefAction<T>>()
-                .ToList();
+                    .Cast<RefAction<T>>()
+                    .ToList();
             foreach (var sub in subs) sub(ref args);
         }
     }

@@ -8,18 +8,21 @@ namespace Acciaio
 	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
 	public sealed class SceneAttribute : PropertyAttribute
 	{
-		private const string DEFAULT_NONE_LABEL = "(None)";
+		private const string DefaultNoneLabel = "(None)";
         
 		public bool ShowNoneOption { get; }
 		public string NoneOptionLabel { get; }
 
-		public SceneAttribute() : this(true, DEFAULT_NONE_LABEL) { }
-		public SceneAttribute(bool showNoneOption) : this(showNoneOption, DEFAULT_NONE_LABEL) { }
-		public SceneAttribute(string noneOptionLabel) : this(true, noneOptionLabel) { }
 		private SceneAttribute(bool showNoneOption, string noneOptionLabel)
 		{
 			ShowNoneOption = showNoneOption;
 			NoneOptionLabel = noneOptionLabel;
 		}
+
+		public SceneAttribute() : this(true, DefaultNoneLabel) { }
+
+		public SceneAttribute(bool showNoneOption) : this(showNoneOption, DefaultNoneLabel) { }
+
+		public SceneAttribute(string noneOptionLabel) : this(true, noneOptionLabel) { }
 	}
 }
