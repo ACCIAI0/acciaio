@@ -6,6 +6,8 @@ namespace Acciaio
 	[System.Serializable]
 	public struct DecoupledScene
 	{
+		private const string EditorScenePrefsKey = "Acciaio.Editor.EditingScene";
+		
 		[UnityEngine.SerializeField]
 		private string _scene;
 
@@ -15,7 +17,7 @@ namespace Acciaio
 			{
 				var scene = _scene;
 #if UNITY_EDITOR
-				var editorScene = UnityEditor.EditorPrefs.GetString("Acciaio.Editor.EditingScene", null);
+				var editorScene = UnityEditor.EditorPrefs.GetString(EditorScenePrefsKey, null);
 				if (!string.IsNullOrEmpty(editorScene) && SceneManager.GetActiveScene().name != editorScene)
 					scene = editorScene;
 #endif
@@ -32,7 +34,7 @@ namespace Acciaio
 		public bool Equals(string s) => s.Equals(Scene, StringComparison.Ordinal);
 
         public override bool Equals(object obj) 
-	        => (obj is DecoupledScene ds && Equals(ds)) || (obj is string s && Equals(s));
+	        => obj is DecoupledScene ds && Equals(ds) || obj is string s && Equals(s);
 
         public override int GetHashCode() => Scene.GetHashCode();
 

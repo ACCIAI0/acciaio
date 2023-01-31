@@ -166,6 +166,7 @@ namespace Acciaio.Sys
 #endif
 
 			if (!autoHideLoadingView) yield break;
+            
 			var hideLoadingRoutine = HideLoadingViewCo();
 			while (hideLoadingRoutine.MoveNext()) yield return hideLoadingRoutine.Current;
 		}
@@ -214,7 +215,7 @@ namespace Acciaio.Sys
 			=> LoadScene(scenePath, true, loadingScene, autoHideLoadingView);
 #endif
 
-		public SceneOperation LoadScene(string scene, bool useAddressables, bool autoHideLoadingView = true) 
+		public SceneOperation LoadScene(string scene, bool useAddressables, bool autoHideLoadingView) 
 			=> LoadScene(scene, useAddressables, null, autoHideLoadingView);
 
 		public SceneOperation LoadScene(string scene, bool useAddressables, string loadingScene, bool autoHideLoadingView = true)

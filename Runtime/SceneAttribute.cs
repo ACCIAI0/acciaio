@@ -12,14 +12,17 @@ namespace Acciaio
         
 		public bool ShowNoneOption { get; }
 		public string NoneOptionLabel { get; }
-
-		public SceneAttribute() : this(true, DefaultNoneLabel) { }
-		public SceneAttribute(bool showNoneOption) : this(showNoneOption, DefaultNoneLabel) { }
-		public SceneAttribute(string noneOptionLabel) : this(true, noneOptionLabel) { }
+        
 		private SceneAttribute(bool showNoneOption, string noneOptionLabel)
 		{
 			ShowNoneOption = showNoneOption;
 			NoneOptionLabel = noneOptionLabel;
 		}
+
+		public SceneAttribute() : this(true, DefaultNoneLabel) { }
+
+		public SceneAttribute(bool showNoneOption) : this(showNoneOption, DefaultNoneLabel) { }
+
+		public SceneAttribute(string noneOptionLabel) : this(true, noneOptionLabel) { }
 	}
 }

@@ -101,8 +101,7 @@ namespace Acciaio.Collections.Generic
 
         ICollection IDictionary.Values => InternalIDict.Values;
 
-        private Map(Dictionary<TKey, TValue> dictionaryToWrap) => 
-            _internal = dictionaryToWrap;
+        private Map(Dictionary<TKey, TValue> dictionaryToWrap) => _internal = dictionaryToWrap;
 
         public Map() : this(new Dictionary<TKey, TValue>()) { }
 
@@ -128,7 +127,6 @@ namespace Acciaio.Collections.Generic
         /// Creates a new Dictionary starting from this Map. The new Dictionary is independent and changes
         /// in it are not reflected on this Map. To create a view on this map, see AsDictionary() instead.
         /// </summary>
-        /// <returns></returns>
         public Dictionary<TKey, TValue> ToDictionary() => new(_internal);
 
         public void OnAfterDeserialize()

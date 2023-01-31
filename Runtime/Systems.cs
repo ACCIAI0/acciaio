@@ -41,10 +41,10 @@ namespace Acciaio
 				};
 			}
 
-			private IEnumerator Coroutine(IEnumerable<ISystem> systems, Action<bool> callback)
+			private IEnumerator Coroutine(List<ISystem> systems, Action<bool> callback)
 			{
-				foreach (var s in systems)
-					yield return s.Run();
+				foreach (var system in systems)
+					yield return system.Run();
 				_keepWaiting = false;
 				Ready = true;
 				callback?.Invoke(Ready);
@@ -101,7 +101,7 @@ namespace Acciaio
 				return false;
 			}
 
-			var result = SystemsDictionary.TryGetValue(typeof(T), out ISystem s);
+			var result = SystemsDictionary.TryGetValue(typeof(T), out var s);
 			system = (T)s;
 			return result;
 		}

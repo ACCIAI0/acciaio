@@ -12,24 +12,29 @@ namespace Acciaio
     ///main Hub which event publishers and events subscribers refer to. Here, subscribers
     ///can subscribe for certain events by specifying their name and - if any - their
     ///arguments type. Publishers can trigger events by name and let the Hub notify all
-    ///those which subscribed to it. This functionality is NOT threadsafe.
+    ///those which subscribed to it. This functionality is NOT thread-safe.
     ///</summary>
     public sealed class PubSubBoard
     {
         private static readonly Type VoidType = typeof(void);
         private static readonly List<object> EmptySubs = new();
+        private static readonly StringBuilder KeyBuilder = new();
 
-        private readonly Dictionary<string, List<object>> _subscribersByType = new();
-        private readonly Dictionary<string, List<object>> _refSubscribersByType = new();
-
-        private string BuildKey(string eventName, Type type)
+        private static string BuildKey(string eventName, Type type)
         {
-            var builder = new StringBuilder("<")
+            var result = KeyBuilder
+                    .Append('<')
                     .Append(eventName)
                     .Append(">__")
-                    .Append(type.FullName);
-            return builder.ToString();
+                    .Append(type.FullName)
+                    .ToString();
+            KeyBuilder.Clear();
+            return result;
         }
+
+        private readonly Dictionary<string, List<object>> _subscribersByType = new();
+
+        private readonly Dictionary<string, List<object>> _refSubscribersByType = new();
 
         private void Subscribe(string key, object subscriptionAsObject)
         {

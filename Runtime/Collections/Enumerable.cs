@@ -48,12 +48,12 @@ namespace Acciaio.Collections
 
 #region Int Range
 
-/// <summary>
-///  Builds an enumerable of int values ranging from 0 (inclusive) to 'to' (exclusive), using increments of length 'step' (default 1).
-/// </summary>
-/// <param name="to">the exclusive end of the range</param>
-/// <param name="step">the non-negative step increment to use</param>
-public static IEnumerable<int> Range(int to, ushort step = 1) => Range(0, to, step);
+        /// <summary>
+        ///  Builds an enumerable of int values ranging from 0 (inclusive) to 'to' (exclusive), using increments of length 'step' (default 1).
+        /// </summary>
+        /// <param name="to">the exclusive end of the range</param>
+        /// <param name="step">the non-negative step increment to use</param>
+        public static IEnumerable<int> Range(int to, ushort step = 1) => Range(0, to, step);
 
         /// <summary>
         /// Builds an enumerable of int values ranging from 'from' (inclusive) to 'to' (exclusive), using increments of length 'step' (default 1).
@@ -76,6 +76,7 @@ public static IEnumerable<int> Range(int to, ushort step = 1) => Range(0, to, st
         /// Builds an enumerable of long values ranging from 0 (inclusive) to 'to' (exclusive), using unary increments.
         /// </summary>
         /// <param name="to">the exclusive end of the range</param>
+        /// <param name="step">the non-negative step increment to use</param>
         public static IEnumerable<long> Range(long to, uint step = 1) => Range(0, to, step);
 
         /// <summary>
