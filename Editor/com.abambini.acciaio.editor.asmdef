@@ -1,5 +1,6 @@
+
 {
-    "name": "Acciaio Systems Editor",
+    "name": "Acciaio Editor",
     "rootNamespace": "Acciaio.Editor",
     "references": [
         "GUID:cab1a99322eb7df42b056e6550ddcc75"

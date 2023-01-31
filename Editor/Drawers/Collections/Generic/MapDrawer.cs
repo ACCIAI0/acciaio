@@ -1,40 +1,41 @@
-using UnityEngine;
+using System.Collections.Generic;
+using System.Reflection;
+using Acciaio.Collections.Generic;
+using Acciaio.Editor.Extensions;
 using UnityEditor;
 using UnityEditorInternal;
-using Acciaio.Editor;
-using System.Reflection;
+using UnityEngine;
 using UnityEngine.UIElements;
-using System.Collections.Generic;
 
-namespace Acciaio.Collections.Generic.Editor
+namespace Acciaio.Editor.Collections.Generic
 {
     [CustomPropertyDrawer(typeof(Map<,>), true)]
     public sealed class MapDrawer : PropertyDrawer
     {
-        private const int MARGIN = 2;
-        private const int ICON_SIZE = 18;
-        private const string WARN_ICON_NAME = "console.warnicon@2x";
-        private const string ERR_ICON_NAME = "console.erroricon@2x";
-        private const string LIST_NAME = "_serializedEntries";
-        private const string KEY_NAME = "Key";
-        private const string VALUE_NAME = "Value";
-        private const string DUP_TOOLTIP = "This entry is a duplicate and will be ignored.";
-        private const string NULL_TOOLTIP = "A key with a null value will be ignored.";
-        private const string KEY_DUP_NAME = "<color=yellow>{0} [DUPLICATE]</color>";
-        private const string KEY_NULL_NAME = "<color=red>{0} [NULL]</color>";
+        private const int Margin = 2;
+        private const int IconSize = 18;
+        private const string WarnIconName = "console.warnicon@2x";
+        private const string ErrIconName = "console.erroricon@2x";
+        private const string ListName = "_serializedEntries";
+        private const string KeyName = "Key";
+        private const string ValueName = "Value";
+        private const string DupTooltip = "This entry is a duplicate and will be ignored.";
+        private const string NullTooltip = "A key with a null value will be ignored.";
+        private const string KeyDupName = "<color=yellow>{0} [DUPLICATE]</color>";
+        private const string KeyNullName = "<color=red>{0} [NULL]</color>";
 
-        private readonly Dictionary<string, ReorderableList> lists = new();
+        private readonly Dictionary<string, ReorderableList> _lists = new();
 
         private static bool IsAlreadyPresent(SerializedProperty list, int index)
         {
             var entry = list.GetArrayElementAtIndex(index);
-            var key = entry.FindPropertyRelative(KEY_NAME);
+            var key = entry.FindPropertyRelative(KeyName);
 
             var found = false;
             for (var i = 0; i < index && !found; i++)
             {
                 var previousEntry = list.GetArrayElementAtIndex(i);
-                var previousKey = previousEntry.FindPropertyRelative(KEY_NAME);
+                var previousKey = previousEntry.FindPropertyRelative(KeyName);
                 found = SerializedProperty.DataEquals(key, previousKey);
             }
             return found;
@@ -42,7 +43,7 @@ namespace Acciaio.Collections.Generic.Editor
 
         private ReorderableList RetrieveList(SerializedProperty property, GUIContent label)
         {
-            if (lists.ContainsKey(property.propertyPath)) return lists[property.propertyPath];
+            if (_lists.ContainsKey(property.propertyPath)) return _lists[property.propertyPath];
 
             var names = fieldInfo.GetCustomAttribute<MapNamesAttribute>();
             ReorderableList list = new(property.serializedObject, property, true, true, true, true)
@@ -52,8 +53,8 @@ namespace Acciaio.Collections.Generic.Editor
                 {
                     if (property.arraySize == 0) return EditorGUIUtility.singleLineHeight;
                     var entry = property.GetArrayElementAtIndex(index);
-                    var key = entry.FindPropertyRelative(KEY_NAME);
-                    var value = entry.FindPropertyRelative(VALUE_NAME);
+                    var key = entry.FindPropertyRelative(KeyName);
+                    var value = entry.FindPropertyRelative(ValueName);
                     return EditorGUI.GetPropertyHeight(key, true) + EditorGUI.GetPropertyHeight(value, true) + 4;
                 },
                 drawElementCallback = (rect, index, isActive, isFocused) =>
@@ -62,24 +63,24 @@ namespace Acciaio.Collections.Generic.Editor
                     rect.height -= 2;
 
                     var entry = property.GetArrayElementAtIndex(index);
-                    var key = entry.FindPropertyRelative(KEY_NAME);
-                    var value = entry.FindPropertyRelative(VALUE_NAME);
+                    var key = entry.FindPropertyRelative(KeyName);
+                    var value = entry.FindPropertyRelative(ValueName);
 
-                    string keyName = names?.KeyName ?? MapNamesAttribute.DefaultKey;
-                    string keyTooltip = "";
+                    var keyName = names?.KeyName ?? MapNamesAttribute.DefaultKey;
+                    var keyTooltip = "";
 
-                    bool isNullKey = key.propertyType == SerializedPropertyType.ObjectReference && key.objectReferenceValue == null;
+                    var isNullKey = key.propertyType == SerializedPropertyType.ObjectReference && key.objectReferenceValue == null;
                     if (isNullKey || IsAlreadyPresent(property, index))
                     {
-                        var iconRect = new Rect(rect.x - ICON_SIZE, rect.y + MARGIN, ICON_SIZE,
-                            ICON_SIZE);
-                        var icon = isNullKey ? ERR_ICON_NAME : WARN_ICON_NAME;
-                        keyTooltip = isNullKey ? NULL_TOOLTIP : DUP_TOOLTIP;
+                        var iconRect = new Rect(rect.x - IconSize, rect.y + Margin, IconSize,
+                            IconSize);
+                        var icon = isNullKey ? ErrIconName : WarnIconName;
+                        keyTooltip = isNullKey ? NullTooltip : DupTooltip;
                         EditorGUI.LabelField(iconRect, EditorGUIUtility.IconContent(icon, keyTooltip));
-                        keyName = string.Format(isNullKey ? KEY_NULL_NAME : KEY_DUP_NAME, keyName);
+                        keyName = string.Format(isNullKey ? KeyNullName : KeyDupName, keyName);
                     }
 
-                    var keyRect = new Rect(rect.x, rect.y + MARGIN, rect.width, EditorGUI.GetPropertyHeight(key, true));
+                    var keyRect = new Rect(rect.x, rect.y + Margin, rect.width, EditorGUI.GetPropertyHeight(key, true));
                     EditorStyles.label.richText = true;
                     EditorGUI.PropertyField(keyRect, key, new GUIContent(keyName, keyTooltip), true);
                     EditorStyles.label.richText = false;
@@ -92,13 +93,13 @@ namespace Acciaio.Collections.Generic.Editor
                 {
                     list.serializedProperty.arraySize++;
                     var entry = list.serializedProperty.GetArrayElementAtIndex(list.serializedProperty.arraySize - 1);
-                    var key = entry.FindPropertyRelative(KEY_NAME);
-                    var value = entry.FindPropertyRelative(VALUE_NAME);
+                    var key = entry.FindPropertyRelative(KeyName);
+                    var value = entry.FindPropertyRelative(ValueName);
                     key.SetToDefault();
                     value.SetToDefault();
                 }
             };
-            lists.Add(property.propertyPath, list);
+            _lists.Add(property.propertyPath, list);
             return list;
         }
 
@@ -106,7 +107,7 @@ namespace Acciaio.Collections.Generic.Editor
         {
             var totHeight = 0f;
 
-            var serializedEntries = property.FindPropertyRelative(LIST_NAME);
+            var serializedEntries = property.FindPropertyRelative(ListName);
             totHeight += RetrieveList(serializedEntries, label).GetHeight();
 
             return totHeight;
@@ -114,14 +115,14 @@ namespace Acciaio.Collections.Generic.Editor
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            var serializedEntries = property.FindPropertyRelative(LIST_NAME);
+            var serializedEntries = property.FindPropertyRelative(ListName);
             RetrieveList(serializedEntries, label).DoList(position);
             property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
         }
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-             var serializedEntries = property.FindPropertyRelative(LIST_NAME);
+             var serializedEntries = property.FindPropertyRelative(ListName);
             IMGUIContainer container = new()
             {
                 onGUIHandler = () =>

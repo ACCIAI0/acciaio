@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace Acciaio
+namespace Acciaio.Sys
 {
 	public abstract class BaseSystem<TSystem> : Singleton<TSystem>, ISystem where TSystem : BaseSystem<TSystem>
 	{

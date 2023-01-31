@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.SceneManagement;
 
 namespace Acciaio
@@ -26,11 +27,12 @@ namespace Acciaio
 
 		public override string ToString() => Scene;
 
-		public bool Equals(DecoupledScene s) => s.Scene == Scene;
+		public bool Equals(DecoupledScene s) => s.Scene.Equals(Scene, StringComparison.Ordinal);
 
-		public bool Equals(string s) => s == Scene;
+		public bool Equals(string s) => s.Equals(Scene, StringComparison.Ordinal);
 
-        public override bool Equals(object obj) => (obj is DecoupledScene ds && Equals(ds)) || (obj is string s && Equals(s));
+        public override bool Equals(object obj) 
+	        => (obj is DecoupledScene ds && Equals(ds)) || (obj is string s && Equals(s));
 
         public override int GetHashCode() => Scene.GetHashCode();
 

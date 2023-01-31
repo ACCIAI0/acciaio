@@ -1,23 +1,23 @@
 using UnityEngine;
 
-namespace Acciaio
+namespace Acciaio.Extensions
 {
     public static class Vector2Extensions
     {
         /// <summary>
         /// Given the current Vector (x, y), it returns (x, 0)
         /// </summary>
-        public static Vector2 right(this Vector2 vector) => new(vector.x, 0);
+        public static Vector2 Right(this Vector2 vector) => new(vector.x, 0);
 
         /// <summary>
         /// Given the current Vector (x, y), it returns (0, y)
         /// </summary>
-        public static Vector2 up(this Vector2 vector) => new(0, vector.y);
+        public static Vector2 Up(this Vector2 vector) => new(0, vector.y);
 
         /// <summary>
         /// Sizzling operator. Given the Vector (x, y), it returns (x, x)
         /// </summary>
-        public static Vector2 xx(this Vector2 vector) => new(vector.x, vector.x);
+        public static Vector2 Xx(this Vector2 vector) => new(vector.x, vector.x);
 
         /// <summary>
         /// Sizzling operator. Given the Vector (x, y), it returns (y, y)

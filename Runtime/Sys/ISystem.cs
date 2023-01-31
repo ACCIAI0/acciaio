@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Acciaio
+namespace Acciaio.Sys
 {
 	public interface ISystem
 	{

@@ -5,17 +5,17 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace Acciaio.Editor
+namespace Acciaio.Editor.Extensions
 {
     public static class SerializedPropertyExtensions
     {
-		private const BindingFlags INSTANCE_ANY = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
-        private const string PATH_ELEMENT_ARRAY = "Array";
+		private const BindingFlags InstanceAny = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+        private const string PathElementArray = "Array";
 
 		private static void SetDefaultConstructorValue(SerializedProperty property)
 		{
 			var parent = GetObject(property, true);
-			var field = parent.GetType().GetField(property.name,  INSTANCE_ANY);
+			var field = parent.GetType().GetField(property.name,  InstanceAny);
 			field.SetValue(parent, Activator.CreateInstance(field.FieldType, true));
 		}
 
@@ -30,7 +30,7 @@ namespace Acciaio.Editor
             {
                 var pathElement = elements[i];
 
-                if (pathElement == PATH_ELEMENT_ARRAY)
+                if (pathElement == PathElementArray)
                 {
                     var index = int.Parse(elements[i + 1].Replace("data[", "").Replace("]", ""));
                     var j = -1;
@@ -46,11 +46,11 @@ namespace Acciaio.Editor
                 }
                 else
                 {
-					Type type = @object.GetType();
+					var type = @object.GetType();
 					FieldInfo field;
 					do
 					{
-						field = type.GetField(pathElement, INSTANCE_ANY);
+						field = type.GetField(pathElement, InstanceAny);
 						if (field == null) type = type.BaseType;
 					} while (field == null && type != typeof(object));
                     @object = field?.GetValue(@object);
@@ -63,7 +63,7 @@ namespace Acciaio.Editor
         {
             if (property.propertyType != SerializedPropertyType.Gradient) return null;
             return property.GetType()
-                    .GetProperty("gradientValue", INSTANCE_ANY)
+                    .GetProperty("gradientValue", InstanceAny)
                     .GetValue(property) as Gradient;
         }
 
@@ -76,7 +76,7 @@ namespace Acciaio.Editor
             }
 
             property.GetType()
-                    .GetProperty("gradientValue", INSTANCE_ANY)
+                    .GetProperty("gradientValue", InstanceAny)
                     .SetValue(property, gradient);
         }
 
@@ -85,7 +85,7 @@ namespace Acciaio.Editor
         public static T GetValue<T>(this SerializedProperty property)
         {
             var @object = GetObject(property, false);
-            if (typeof(T).IsAssignableFrom(@object.GetType())) return (T)@object;
+            if (@object is T tObject) return tObject;
             Debug.LogError($"{property.name} is not a valid {typeof(T).Name}");
             return default;
         }
@@ -173,13 +173,13 @@ namespace Acciaio.Editor
 
 		public static T GetAttribute<T>(this SerializedProperty property) where T : PropertyAttribute
 		{
-			FieldInfo info = GetObject(property, true).GetType().GetField(property.name, INSTANCE_ANY);
+			var info = GetObject(property, true).GetType().GetField(property.name, InstanceAny);
 			return info.GetCustomAttribute<T>();
 		}
 
 		public static IEnumerable<T> GetAttributes<T>(this SerializedProperty property) where T : PropertyAttribute
 		{
-			FieldInfo info = GetObject(property, true).GetType().GetField(property.name, INSTANCE_ANY);
+			var info = GetObject(property, true).GetType().GetField(property.name, InstanceAny);
 			return info.GetCustomAttributes<T>();
 		}
     }

@@ -35,7 +35,7 @@ namespace Acciaio
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException(nameof(subscriptionAsObject), "Cannot accept null subscriptions");
-            if (!_subscribersByType.TryGetValue(key, out List<object> subs))
+            if (!_subscribersByType.TryGetValue(key, out var subs))
             {
                 subs = new List<object>();
                 _subscribersByType.Add(key, subs);
@@ -47,7 +47,7 @@ namespace Acciaio
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException(nameof(subscriptionAsObject), "Cannot accept null subscriptions");
-            if (!_refSubscribersByType.TryGetValue(key, out List<object> subs))
+            if (!_refSubscribersByType.TryGetValue(key, out var subs))
             {
                 subs = new List<object>();
                 _refSubscribersByType.Add(key, subs);
@@ -59,26 +59,20 @@ namespace Acciaio
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException(nameof(subscriptionAsObject), "Cannot unsubscribe null subscriptions");
-            if (!_subscribersByType.TryGetValue(key, out List<object> subs))
-                return false;
-            return subs.Remove(subscriptionAsObject);
+            return _subscribersByType.TryGetValue(key, out var subs) && subs.Remove(subscriptionAsObject);
         }
 
         private bool RefUnsubscribe(string key, object subscriptionAsObject)
         {
             if (subscriptionAsObject == null)
                 throw new ArgumentNullException(nameof(subscriptionAsObject), "Cannot unsubscribe null subscriptions");
-            if (!_refSubscribersByType.TryGetValue(key, out List<object> subs))
-                return false;
-            return subs.Remove(subscriptionAsObject);
+            return _refSubscribersByType.TryGetValue(key, out var subs) && subs.Remove(subscriptionAsObject);
         }
 
-        private List<object> RetrieveSubs(string key, bool isRef) 
+        private IEnumerable<object> RetrieveSubs(string key, bool isRef) 
         {
             var dict = isRef ? _refSubscribersByType : _subscribersByType;
-            if (!dict.ContainsKey(key))
-                return EmptySubs;
-            return dict[key];
+            return !dict.ContainsKey(key) ? EmptySubs : dict[key];
         }
 
         ///<summary>
@@ -124,8 +118,8 @@ namespace Acciaio
         public void Trigger(string eventName)
         {
             var subs = RetrieveSubs(BuildKey(eventName, VoidType), false)
-                .Cast<Action>()
-                .ToList();
+                    .Cast<Action>()
+                    .ToList();
             foreach (var sub in subs) sub();
         }
 
@@ -135,8 +129,8 @@ namespace Acciaio
         public void Trigger<T>(string eventName, T args) 
         {
             var subs = RetrieveSubs(BuildKey(eventName, typeof(T)), false)
-                    .Cast<Action<T>>()
-                    .ToList();
+                        .Cast<Action<T>>()
+                        .ToList();
             foreach (var sub in subs) sub(args);
         }
 
@@ -147,8 +141,8 @@ namespace Acciaio
         public void Trigger<T>(string eventName, ref T args)
         {
             var subs = RetrieveSubs(BuildKey(eventName, typeof(T)), true)
-                .Cast<RefAction<T>>()
-                .ToList();
+                    .Cast<RefAction<T>>()
+                    .ToList();
             foreach (var sub in subs) sub(ref args);
         }
     }

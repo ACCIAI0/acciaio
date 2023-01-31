@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Acciaio.Sys;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,17 +10,15 @@ namespace Acciaio
 {
 	public static class Systems
 	{
-        private class SystemOperation : CustomYieldInstruction
+        private sealed class SystemsLoadingOperation : CustomYieldInstruction
         {
-			private readonly AsyncOperation _op;
-			private bool _keepWaiting = true;
+	        private bool _keepWaiting = true;
 
             public override bool keepWaiting => _keepWaiting;
 
-			public SystemOperation(string systemsSceneName, Action<bool> callback)
+			public SystemsLoadingOperation(string systemsSceneName, Action<bool> callback)
 			{
-				_op = SceneManager.LoadSceneAsync(systemsSceneName, LoadSceneMode.Additive);
-				_op.completed += _ =>
+				SceneManager.LoadSceneAsync(systemsSceneName, LoadSceneMode.Additive).completed += _ =>
 				{
 					var scene = SceneManager.GetSceneByName(systemsSceneName);
 					if (!scene.IsValid())
@@ -37,7 +36,7 @@ namespace Acciaio
 							.Where(system => system != null)
 							.OrderBy(system => system.Priority)
 							.ToList();
-					systems.ForEach(system => _systems.Add(system.GetType(), system));
+					systems.ForEach(system => SystemsDictionary.Add(system.GetType(), system));
 					CoroutineRunner.Start(Coroutine(systems, callback));
 				};
 			}
@@ -52,9 +51,9 @@ namespace Acciaio
 			}
         }
         
-		public const string SCENE_NAME = "Systems";
+		public const string SceneName = "Systems";
 
-		private static readonly Dictionary<Type, ISystem> _systems = new();
+		private static readonly Dictionary<Type, ISystem> SystemsDictionary = new();
 
 		public static Scene ActiveSystemsScene { get; private set; }
 		public static bool Ready { get; private set; }
@@ -62,7 +61,7 @@ namespace Acciaio
 		/// <summary>
 		/// Initializes the Systems architecture. To wait for the operations to complete, yield on this call in a coroutine.
 		/// </summary>
-		public static CustomYieldInstruction Load(Action<bool> callback = null) => Load(SCENE_NAME, callback);
+		public static CustomYieldInstruction Load(Action<bool> callback = null) => Load(SceneName, callback);
 
 		/// <summary>
 		/// Initializes the Systems architecture with the specified Systems scene name.
@@ -75,7 +74,7 @@ namespace Acciaio
 				callback?.Invoke(Ready);
 				return null;
 			}
-			return new SystemOperation(systemsSceneName, callback);
+			return new SystemsLoadingOperation(systemsSceneName, callback);
 		}
 
 		/// <summary>
@@ -85,7 +84,7 @@ namespace Acciaio
 		public static T GetSystem<T>() where T : ISystem
 		{
 			if (!Ready) throw new InvalidOperationException("Systems are not Ready. Ensure Load() has been called before this.");
-			return (T)_systems[typeof(T)];
+			return (T)SystemsDictionary[typeof(T)];
 		}
 
 		/// <summary>
@@ -102,7 +101,7 @@ namespace Acciaio
 				return false;
 			}
 
-			var result = _systems.TryGetValue(typeof(T), out ISystem s);
+			var result = SystemsDictionary.TryGetValue(typeof(T), out ISystem s);
 			system = (T)s;
 			return result;
 		}

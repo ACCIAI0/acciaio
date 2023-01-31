@@ -1,18 +1,18 @@
 using UnityEngine;
 
-namespace Acciaio
+namespace Acciaio.Extensions
 {
     public static class Vector2IntExtensions
     {
         /// <summary>
         /// Given the current Vector (x, y), it returns (x, 0)
         /// </summary>
-        public static Vector2Int right(this Vector2Int vector) => new(vector.x, 0);
+        public static Vector2Int Right(this Vector2Int vector) => new(vector.x, 0);
 
         /// <summary>
         /// Given the current Vector (x, y), it returns (0, y)
         /// </summary>
-        public static Vector2Int up(this Vector2Int vector) => new(0, vector.y);
+        public static Vector2Int Up(this Vector2Int vector) => new(0, vector.y);
 
         /// <summary>
         /// Sizzling operator. Given the Vector (x, y), it returns (x, x)

@@ -3,26 +3,28 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
-namespace Acciaio
+namespace Acciaio.Collections
 {
     public static class Enumerable
     {
-        private readonly static Random rng = new(DateTime.Now.Millisecond);
-        private readonly static RNGCryptoServiceProvider crypto = new();
+        private static readonly Random Rng = new(DateTime.Now.Millisecond);
+        private static readonly RNGCryptoServiceProvider Crypto = new();
 
         private static IEnumerable<T> InternalRandomSample<T>(IEnumerable<T> e, int n, bool withRepetitions)
         {
             if (n < 0)
                 throw new ArgumentException("Negative sample count in RandomSample");
-            if (n == 0 || e.IsEmpty() || (!withRepetitions && n > e.Count())) 
-                yield break;
+            if (n == 0) yield break;
             
             var list = e.ToList();
+            if (list.IsEmpty() || (!withRepetitions && n > list.Count)) 
+                yield break;
+            
             for (int i = 0, start = 0; i < n; i++)
             {
-                int index = rng.Next(start, list.Count);
-                T element = list[index];
-                if(!withRepetitions) list.Swap(start++, index);
+                var index = Rng.Next(start, list.Count);
+                var element = list[index];
+                if (!withRepetitions) list.Swap(start++, index);
                 yield return element;
             }
         }
@@ -30,9 +32,9 @@ namespace Acciaio
         private static IEnumerable<T> InternalShuffled<T>(IEnumerable<T> enumerable, Func<int, int> randomSupplier)
         {
             var shuffled = new List<T>();
-            foreach (T v in enumerable)
+            foreach (var v in enumerable)
             {
-                int j = randomSupplier(shuffled.Count + 1);
+                var j = randomSupplier(shuffled.Count + 1);
                 if (j == shuffled.Count)
                     shuffled.Add(v);
                 else 
@@ -45,11 +47,13 @@ namespace Acciaio
         }
 
 #region Int Range
-        ///<summary>
-        /// Builds an enumerable of int values ranging from 0 (inclusive) to 'to' (exclusive), using increments of length 'step' (default 1).
-        ///</summary>
-        ///<param name="to">the exclusive end of the range</param>
-        public static IEnumerable<int> Range(int to, ushort step = 1) => Range(0, to, step);
+
+/// <summary>
+///  Builds an enumerable of int values ranging from 0 (inclusive) to 'to' (exclusive), using increments of length 'step' (default 1).
+/// </summary>
+/// <param name="to">the exclusive end of the range</param>
+/// <param name="step">the non-negative step increment to use</param>
+public static IEnumerable<int> Range(int to, ushort step = 1) => Range(0, to, step);
 
         /// <summary>
         /// Builds an enumerable of int values ranging from 'from' (inclusive) to 'to' (exclusive), using increments of length 'step' (default 1).
@@ -60,9 +64,9 @@ namespace Acciaio
         /// <param name="step">the non-negative step increment to use</param>
         public static IEnumerable<int> Range(int from, int to, ushort step = 1)
         {
-            bool isForward = from < to;
-            int internalStep = (2 * Convert.ToInt32(isForward) - 1) * step;
-            for (int i = from; (isForward && i < to) || (!isForward && i > to); i += internalStep)
+            var isForward = from < to;
+            var internalStep = (2 * Convert.ToInt32(isForward) - 1) * step;
+            for (var i = from; (isForward && i < to) || (!isForward && i > to); i += internalStep)
                 yield return i;
         }
 #endregion
@@ -90,24 +94,19 @@ namespace Acciaio
         }
 #endregion
 
-        /// <summery>
+        /// <summary>
         /// Returns one random element from the given enumerable or default(T) if it is empty.
         /// </summary>
-        public static T RandomSample<T>(this IEnumerable<T> enumerable)
-        {
-            if (enumerable.Count() == 0) return default;
-            return enumerable.ElementAt(rng.Next(0, enumerable.Count()));
-        }
+        public static T RandomSample<T>(this IEnumerable<T> enumerable) 
+            => !enumerable.Any() ? default : enumerable.ElementAt(Rng.Next(0, enumerable.Count()));
 
         /// <summery>
         /// Returns an IEnumerable of n random elements from the given enumerable. If the withRepetitions flag is false it guarantees that 
         /// the returned IEnumerable won't contain duplicates if and only if the original enumerable doesn't contain duplicates.
         /// Allocates memory proportionally to the size of enumerable.
         /// </summary>
-        public static IEnumerable<T> RandomSample<T>(this IEnumerable<T> enumerable, int n, bool withRepetitions = false)
-        {
-            return InternalRandomSample(enumerable, n, withRepetitions);
-        }
+        public static IEnumerable<T> RandomSample<T>(this IEnumerable<T> enumerable, int n, bool withRepetitions = false) 
+            => InternalRandomSample(enumerable, n, withRepetitions);
 
         /// <summery>
         /// Returns an IEnumerable of n random elements from the given enumerable. It will contain maxOccurrences occurrences or less
@@ -119,16 +118,16 @@ namespace Acciaio
             if (maxOccurences <= 0) 
                 return InternalRandomSample(enumerable, n, true);
             var concat = enumerable;
-            for (int i = 1; i < maxOccurences; i++)
+            for (var i = 1; i < maxOccurences; i++)
                 concat = concat.Concat(enumerable);
             return InternalRandomSample(concat, n, false);
         }
 
         /// <summary>
-        /// Randomly reaorders the enumerable using pseudo-random generation. It's faster than FineShuffled. The resulting IEnumerable 
+        /// Randomly reorders the enumerable using pseudo-random generation. It's faster than FineShuffled. The resulting IEnumerable 
         /// is eager evaluated.
         /// </summary>
-        public static IEnumerable<T> Shuffled<T>(this IEnumerable<T> enumerable) => InternalShuffled(enumerable, rng.Next);
+        public static IEnumerable<T> Shuffled<T>(this IEnumerable<T> enumerable) => InternalShuffled(enumerable, Rng.Next);
 
         /// <summary>
         /// Randomly reorders the enumerable using a crypto-random generator. It's slower than Shuffled and allocates memory, but 
@@ -139,8 +138,8 @@ namespace Acciaio
         {
             return InternalShuffled(enumerable, v => 
             {
-                byte[] bytesBuffer = new byte[sizeof(int)];
-                crypto.GetBytes(bytesBuffer);
+                var bytesBuffer = new byte[sizeof(int)];
+                Crypto.GetBytes(bytesBuffer);
 
                 //The most significant bit must be 0 so that the generated number is positive (an index).
                 bytesBuffer[^1] &= 0b01111111; 
@@ -170,6 +169,8 @@ namespace Acciaio
             var enum2 = en2.GetEnumerator();
             while (enum1.MoveNext() && enum2.MoveNext())
                 yield return (enum1.Current, enum2.Current);
+            enum1.Dispose();
+            enum2.Dispose();
         }
 
         /// <summary>
@@ -190,7 +191,7 @@ namespace Acciaio
                 list.Insert(0, item);
             else
             {
-                int index = list.BinarySearch(item, comparer);
+                var index = list.BinarySearch(item, comparer);
                 if (index < 0) index = ~index;
                 list.Insert(index, item);
             }
@@ -214,14 +215,14 @@ namespace Acciaio
                 list.AddFirst(item);
             else if (comparer.Compare(item, list.First.Value) <= comparer.Compare(list.Last.Value, item))
             {
-                LinkedListNode<T> next = list.First.Next;
+                var next = list.First.Next;
                 while (comparer.Compare(item, next.Value) > 0) 
                     next = next.Next;
                 list.AddBefore(next, item);
             }
             else 
             {
-                LinkedListNode<T> previous = list.Last.Previous;
+                var previous = list.Last.Previous;
                 while (comparer.Compare(item, previous.Value) < 0) 
                     previous = previous.Previous;
                 list.AddAfter(previous, item);

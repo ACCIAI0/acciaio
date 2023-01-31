@@ -11,7 +11,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceProviders;
 #endif
 
-namespace Acciaio
+namespace Acciaio.Sys
 {
     public sealed class ScenesSystem : BaseSystem<ScenesSystem>
     {
@@ -85,7 +85,7 @@ namespace Acciaio
 					yield return SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
 			}
 
-			Scene loading = !string.IsNullOrEmpty(loadingScene) ? SceneManager.GetSceneByName(loadingScene) : new();
+			var loading = !string.IsNullOrEmpty(loadingScene) ? SceneManager.GetSceneByName(loadingScene) : new();
 			if (loading.IsValid())
 			{
 				SceneManager.SetActiveScene(loading);
@@ -97,7 +97,7 @@ namespace Acciaio
 
 			yield return _currentLoadingView?.Show();
 
-            IProgressLoadingView progressLoadingView = _currentLoadingView as IProgressLoadingView;
+            var progressLoadingView = _currentLoadingView as IProgressLoadingView;
 
 #if USE_ADDRESSABLES
 			if (toUnload == _loadedAddressablesScene.Scene) 
@@ -165,11 +165,9 @@ namespace Acciaio
 			}
 #endif
 
-			if (autoHideLoadingView)
-			{
-				IEnumerator hideLoadingRoutine = HideLoadingViewCo();
-				while (hideLoadingRoutine.MoveNext()) yield return hideLoadingRoutine.Current;
-			}
+			if (!autoHideLoadingView) yield break;
+			var hideLoadingRoutine = HideLoadingViewCo();
+			while (hideLoadingRoutine.MoveNext()) yield return hideLoadingRoutine.Current;
 		}
 
 		private IEnumerator AddSceneCo(string scene, bool useAddressables)
@@ -253,8 +251,8 @@ namespace Acciaio
 
 		public void RemoveScene(string sceneName)
 		{
-			Scene scene = SceneManager.GetSceneByName(sceneName);
-			Scene active = SceneManager.GetActiveScene();
+			var scene = SceneManager.GetSceneByName(sceneName);
+			var active = SceneManager.GetActiveScene();
 
 			if (scene == active) Debug.LogWarning($"Removing active scene {sceneName}.");
 

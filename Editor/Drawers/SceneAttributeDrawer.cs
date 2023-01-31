@@ -70,7 +70,7 @@ namespace Acciaio.Editor
 			return element;
 		}
 
-		public sealed override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
+		public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
 		{
 			if (!AcciaioEditor.GetBuildSettingsScenes().Any())
 			{

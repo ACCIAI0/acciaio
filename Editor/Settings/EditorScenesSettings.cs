@@ -1,10 +1,11 @@
+using System;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Acciaio.Editor
+namespace Acciaio.Editor.Settings
 {
 	[InitializeOnLoad]
 	public sealed class EditorScenesSettings : ScriptableObject
@@ -12,9 +13,9 @@ namespace Acciaio.Editor
 		/// <summary>
 		/// Editor Prefs key for retrieving the scene that is currently being edited.
 		/// </summary>
-		private const string EDITING_SCENE_PREFS_KEY = "Acciaio.Editor.EditingScene";
+		private const string EditingScenePrefsKey = "Acciaio.Editor.EditingScene";
 
-		public const string SETTINGS_PATH = "Assets/Editor/EditorScenesSettings.asset";
+		private const string SettingsPath = "Assets/Editor/EditorScenesSettings.asset";
 
         static EditorScenesSettings() => EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
@@ -44,16 +45,16 @@ namespace Acciaio.Editor
 					EditorApplication.isPlaying = false;
 					return;
 				}
-				EditorPrefs.SetString(EDITING_SCENE_PREFS_KEY, SceneManager.GetActiveScene().name);
+				EditorPrefs.SetString(EditingScenePrefsKey, SceneManager.GetActiveScene().name);
 			}
-			else if (change == PlayModeStateChange.EnteredEditMode) EditorPrefs.DeleteKey(EDITING_SCENE_PREFS_KEY);
+			else if (change == PlayModeStateChange.EnteredEditMode) EditorPrefs.DeleteKey(EditingScenePrefsKey);
 		}
 
 		internal static EditorScenesSettings GetOrCreateSettings()
 		{
             static bool BuildPathIfNecessary()
 			{
-				var parent = SETTINGS_PATH[..SETTINGS_PATH.LastIndexOf("/")];
+				var parent = SettingsPath[..SettingsPath.LastIndexOf("/", StringComparison.Ordinal)];
 				if (AssetDatabase.IsValidFolder(parent))
 					return true;
 				var folders = parent.Split('/', System.StringSplitOptions.RemoveEmptyEntries);
@@ -64,8 +65,8 @@ namespace Acciaio.Editor
 					return false;
 				}
 
-				string path = folders[0];
-				for (int i = 1; i < folders.Length; i++)
+				var path = folders[0];
+				for (var i = 1; i < folders.Length; i++)
 				{
 					if (!AssetDatabase.IsValidFolder($"{path}/{folders[i]}"))
 						AssetDatabase.CreateFolder(path, folders[i]);
@@ -74,12 +75,12 @@ namespace Acciaio.Editor
 				return true;
 			}
 
-			var settings = AssetDatabase.LoadAssetAtPath<EditorScenesSettings>(SETTINGS_PATH);
+			var settings = AssetDatabase.LoadAssetAtPath<EditorScenesSettings>(SettingsPath);
 			if (settings == null)
 			{
 				if (!BuildPathIfNecessary()) return null;
 				settings = CreateInstance<EditorScenesSettings>();
-				AssetDatabase.CreateAsset(settings, SETTINGS_PATH);
+				AssetDatabase.CreateAsset(settings, SettingsPath);
 				AssetDatabase.SaveAssets();
 			}
 			return settings;

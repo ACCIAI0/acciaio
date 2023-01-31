@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Acciaio
+namespace Acciaio.Sys
 {
     public sealed class PubSubSystem : BaseSystem<PubSubSystem>
     {

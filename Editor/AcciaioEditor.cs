@@ -86,7 +86,7 @@ namespace Acciaio.Editor
 
 			var scenes = BuildScenesArrayForField(allowEmpty, "").ToList();
 			PopupField<string> popup = new(label, scenes, value, Display, Display);
-			popup.RegisterCallback<ChangeEvent<string>>(evt => onValueChanged?.Invoke(evt.newValue));
+			popup.RegisterValueChangedCallback<string>(evt => onValueChanged?.Invoke(evt.newValue));
 			return popup;
 		}
 
@@ -94,7 +94,7 @@ namespace Acciaio.Editor
 		{
 			var scenes = BuildScenesArrayForField(false, null).ToList();
 			PopupField<string> popup = new(label, scenes, value);
-			popup.RegisterCallback<ChangeEvent<string>>(evt => onValueChanged?.Invoke(scenes.IndexOf(evt.newValue)));
+			popup.RegisterValueChangedCallback<string>(evt => onValueChanged?.Invoke(scenes.IndexOf(evt.newValue)));
 			return popup;
 		}
 	}

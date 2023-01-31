@@ -5,6 +5,7 @@ namespace Acciaio
 {
 	public static class CoroutineRunner
 	{
+		private const string RunnerGameObjectName = "[ACCIAIO] COROUTINE RUNNER";
 		private sealed class Runner : MonoBehaviour { }
 
 		private sealed class DelayedAction : CancelableDelay
@@ -56,7 +57,7 @@ namespace Acciaio
 		{
 			if (_runner == null)
 			{
-				_runner = new GameObject($"[COROUTINE RUNNER]").AddComponent<Runner>();
+				_runner = new GameObject(RunnerGameObjectName).AddComponent<Runner>();
 				Object.DontDestroyOnLoad(_runner.gameObject);
 			}
 			_runner.gameObject.SetActive(true);
@@ -70,7 +71,7 @@ namespace Acciaio
 			_runner.StopCoroutine(c);
 		}
 
-		public static CancelableDelay ExecuteAfterSeconds(System.Action action, float delay) =>
-			new DelayedAction(action, delay);
+		public static CancelableDelay ExecuteAfterSeconds(System.Action action, float delay) 
+			=> new DelayedAction(action, delay);
 	}
 }

@@ -29,11 +29,17 @@ namespace Acciaio.Collections.Generic
                 Value = kvp.Value;
             }
 
-            public bool Equals(Entry e) => 
-                Key.Equals(e.Key) && Value.Equals(e.Value);
+            public bool Equals(Entry e)
+            {
+                return EqualityComparer<TKey>.Default.Equals(Key, e.Key) &&
+                       EqualityComparer<TValue>.Default.Equals(Value, e.Value);
+            }
 
-            public bool Equals(KeyValuePair<TKey, TValue> kvp) => 
-                Key.Equals(kvp.Key) && Value.Equals(kvp.Value);
+            public bool Equals(KeyValuePair<TKey, TValue> kvp)
+            {
+                return EqualityComparer<TKey>.Default.Equals(Key, kvp.Key) &&
+                       EqualityComparer<TValue>.Default.Equals(Value, kvp.Value);
+            }
 
             public override bool Equals(object obj)
             {
@@ -41,7 +47,7 @@ namespace Acciaio.Collections.Generic
                         obj is KeyValuePair<TKey, TValue> kvp && Equals(kvp);
             }
 
-            public override int GetHashCode() => Key.GetHashCode();
+            public override int GetHashCode() => HashCode.Combine(Key);
 
             public static implicit operator KeyValuePair<TKey, TValue>(Entry entry) => new(entry.Key, entry.Value);
             public static implicit operator Entry(KeyValuePair<TKey, TValue> pair) => new(pair);
@@ -98,23 +104,19 @@ namespace Acciaio.Collections.Generic
         private Map(Dictionary<TKey, TValue> dictionaryToWrap) => 
             _internal = dictionaryToWrap;
 
-        public Map() =>
-            _internal = new Dictionary<TKey, TValue>();
+        public Map() : this(new Dictionary<TKey, TValue>()) { }
 
-        public Map(IDictionary<TKey, TValue> dict) =>
-            _internal = new Dictionary<TKey, TValue>(dict);
+        public Map(IDictionary<TKey, TValue> dict) : this(new Dictionary<TKey, TValue>(dict)) { }
 
-        public Map(IEqualityComparer<TKey> comparer) =>
-            _internal = new Dictionary<TKey, TValue>(comparer);
+        public Map(IEqualityComparer<TKey> comparer) : this(new Dictionary<TKey, TValue>(comparer)) { }
 
-        public Map(int capacity) =>
-            _internal = new Dictionary<TKey, TValue>(capacity);
+        public Map(int capacity) : this(new Dictionary<TKey, TValue>(capacity)) { }
 
-        public Map(IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer) =>
-            _internal = new Dictionary<TKey, TValue>(dict, comparer);
+        public Map(IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer) :
+            this(new Dictionary<TKey, TValue>(dict, comparer)) { }
 
-        public Map(int capacity, IEqualityComparer<TKey> comparer) =>
-            _internal = new Dictionary<TKey, TValue>(capacity, comparer);
+        public Map(int capacity, IEqualityComparer<TKey> comparer) :
+            this(new Dictionary<TKey, TValue>(capacity, comparer)) { }
 
         /// <summary>
         /// Accesses the wrapped dictionary directly. Changes to that dictionary are reflected in this Map and vice-versa.

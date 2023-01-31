@@ -4,22 +4,22 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Acciaio.Editor
+namespace Acciaio.Editor.Settings
 {
 	[CustomEditor(typeof(EditorScenesSettings))]
 	public sealed class EditorScenesSettingsEditor : UnityEditor.Editor
 	{
-		private const string NONE_VALUE = "(None)";
-		private const int TITLE_MARGIN_TOP = 2;
-		private const int TITLE_MARGIN_LEFT = 9;
-		private const int TITLE_FONT_SIZE = 19;
+		private const string NoneValue = "(None)";
+		private const int TitleMarginTop = 2;
+		private const int TitleMarginLeft = 9;
+		private const int TitleFontSize = 19;
 		
-		private const string SETTINGS_MENU_PATH = "Acciaio/Scenes";
+		private const string SettingsMenuPath = "Acciaio/Scenes";
 
 		[SettingsProvider]
 		public static SettingsProvider Provide()
 		{
-			return new(SETTINGS_MENU_PATH, SettingsScope.Project)
+			return new(SettingsMenuPath, SettingsScope.Project)
 			{
 				activateHandler = (searchContext, rootElement) =>
             	{
@@ -45,18 +45,28 @@ namespace Acciaio.Editor
 			var isActive = serializedObject.FindProperty("_isActive");
 			var startupScene = serializedObject.FindProperty("_startupScene");
 
-			var container = new VisualElement();
-			container.style.flexDirection = FlexDirection.Row;
+			var container = new VisualElement
+			{
+				style =
+				{
+					flexDirection = FlexDirection.Row
+				}
+			};
 
-			var title = new Label("Acciaio Scenes");
-			title.style.marginLeft = TITLE_MARGIN_LEFT;
-			title.style.marginTop = TITLE_MARGIN_TOP;
-			title.style.fontSize = TITLE_FONT_SIZE;
-			title.style.unityFontStyleAndWeight = FontStyle.Bold;
+			var title = new Label("Acciaio Scenes")
+			{
+				style =
+				{
+					marginLeft = TitleMarginLeft,
+					marginTop = TitleMarginTop,
+					fontSize = TitleFontSize,
+					unityFontStyleAndWeight = FontStyle.Bold
+				}
+			};
 
-			var scenes = AcciaioEditor.BuildScenesArrayForField(true, NONE_VALUE).ToList();
+			var scenes = AcciaioEditor.BuildScenesArrayForField(true, NoneValue).ToList();
 			var defaultValue = startupScene.stringValue;
-			if (string.IsNullOrEmpty(defaultValue) || !scenes.Contains(defaultValue)) defaultValue = NONE_VALUE;
+			if (string.IsNullOrEmpty(defaultValue) || !scenes.Contains(defaultValue)) defaultValue = NoneValue;
 
 			PopupField<string> popup = new("Editor Startup Scene", scenes, defaultValue);
 			popup.style.flexGrow = 1;
@@ -64,10 +74,10 @@ namespace Acciaio.Editor
 			popup.style.overflow = Overflow.Hidden;
 			popup.SetEnabled(isActive.boolValue);
 
-			popup.RegisterCallback<ChangeEvent<string>>(evt =>
+			popup.RegisterValueChangedCallback<string>(evt =>
             {
                 var value = evt.newValue;
-                if (value == NONE_VALUE) value = "";
+                if (value == NoneValue) value = "";
                 startupScene.stringValue = value;
                 serializedObject.ApplyModifiedProperties();
             });
@@ -77,7 +87,7 @@ namespace Acciaio.Editor
 				value = isActive.boolValue
 			};
 
-			toggle.RegisterCallback<ChangeEvent<bool>>(evt => 
+			toggle.RegisterValueChangedCallback<bool>(evt => 
             {
                 isActive.boolValue = evt.newValue; 
                 popup.SetEnabled(isActive.boolValue);

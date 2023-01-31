@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Acciaio
+namespace Acciaio.Extensions
 {
     public static class ColorExtensions
     {

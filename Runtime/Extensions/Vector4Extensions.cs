@@ -1,28 +1,28 @@
 using UnityEngine;
 
-namespace Acciaio
+namespace Acciaio.Extensions
 {
     public static class Vector4Extensions
     {
         /// <summary>
         /// Given the current Vector (x, y, z, w), it returns (x, 0, 0, 0)
         /// </summary>
-        public static Vector4 right(this Vector4 vector) => new(vector.x, 0, 0, 0);
+        public static Vector4 Right(this Vector4 vector) => new(vector.x, 0, 0, 0);
 
         /// <summary>
         /// Given the current Vector (x, y, z, w), it returns (0, y, 0, 0)
         /// </summary>
-        public static Vector4 up(this Vector4 vector) => new(0, vector.y, 0, 0);
+        public static Vector4 Up(this Vector4 vector) => new(0, vector.y, 0, 0);
 
         /// <summary>
         /// Given the current Vector (x, y, z, w), it returns (0, 0, z, 0)
         /// </summary>
-        public static Vector4 forward(this Vector4 vector) => new(0, 0, vector.z, 0);
+        public static Vector4 Forward(this Vector4 vector) => new(0, 0, vector.z, 0);
 
         /// <summary>
         /// Given the current Vector (x, y, z, w), it returns (0, 0, 0, w)
         /// </summary>
-        public static Vector4 fourth(this Vector4 vector) => new(0, 0, 0, vector.w);
+        public static Vector4 Fourth(this Vector4 vector) => new(0, 0, 0, vector.w);
 
         /// <summary>
         /// Sizzling operator. Give the Vector (x, y, z, w), it returns (x, x)
