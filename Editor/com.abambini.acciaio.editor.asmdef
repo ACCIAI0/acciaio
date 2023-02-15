@@ -1,9 +1,9 @@
-
 {
     "name": "Acciaio Editor",
     "rootNamespace": "Acciaio.Editor",
     "references": [
-        "GUID:cab1a99322eb7df42b056e6550ddcc75"
+        "GUID:cab1a99322eb7df42b056e6550ddcc75",
+        "GUID:69448af7b92c7f342b298e06a37122aa"
     ],
     "includePlatforms": [
         "Editor"
@@ -14,6 +14,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.addressables",
+            "expression": "1.18",
+            "define": "USE_ADDRESSABLES"
+        }
+    ],
     "noEngineReferences": false
 }
