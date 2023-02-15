@@ -41,10 +41,9 @@ namespace Acciaio.Sys
 
             public YieldInstruction HideCurrentLoadingView() => _system.HideCurrentLoadingView();
         }
-
-        [Header("Scenes System")]
-		[SerializeField, Scene("-")]
-		private string _defaultLoadingScene = "";
+		
+		[SerializeField]
+		private SceneReference _defaultLoadingScene;
 
 
 #if USE_ADDRESSABLES
@@ -72,7 +71,7 @@ namespace Acciaio.Sys
 		{
 			var toUnload = SceneManager.GetActiveScene();
 
-			if (string.IsNullOrEmpty(loadingScene)) loadingScene = _defaultLoadingScene;
+			if (string.IsNullOrEmpty(loadingScene)) loadingScene = _defaultLoadingScene.Path;
 
 			if (!string.IsNullOrEmpty(loadingScene))
 			{
@@ -85,7 +84,7 @@ namespace Acciaio.Sys
 					yield return SceneManager.LoadSceneAsync(loadingScene, LoadSceneMode.Additive);
 			}
 
-			var loading = !string.IsNullOrEmpty(loadingScene) ? SceneManager.GetSceneByName(loadingScene) : new();
+			var loading = !string.IsNullOrEmpty(loadingScene) ? GetSceneByPathOrName(loadingScene) : new();
 			if (loading.IsValid())
 			{
 				SceneManager.SetActiveScene(loading);
@@ -160,7 +159,8 @@ namespace Acciaio.Sys
                         yield return null;
                     }
                 }
-				SceneManager.SetActiveScene(SceneManager.GetSceneByName(scene));
+                
+				SceneManager.SetActiveScene(GetSceneByPathOrName(scene));
 #if USE_ADDRESSABLES
 			}
 #endif
@@ -185,6 +185,32 @@ namespace Acciaio.Sys
 			else 
 #endif
 				yield return SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+		}
+
+		private SceneOperation LoadScene(string scene, bool useAddressables, string loadingScene, bool autoHideLoadingView = true)
+		{
+			if (!IsRunning)
+			{
+				Debug.LogError("[Scenes System] System shut down, cannot load a scene.");
+				return null;
+			}
+
+			if (_operation != null)
+				throw new InvalidOperationException("A scene is already being loaded, cannot load another one");
+
+			_operation = new(this, LoadSceneCo(scene, useAddressables, loadingScene, autoHideLoadingView));
+			return _operation;
+		}
+
+		private SceneOperation AddScene(string scene, bool useAddressables)
+		{
+			if (!IsRunning)
+			{
+				Debug.LogError("[Scenes System] System shut down, cannot add a scene.");
+				return null;
+			}
+
+			return new(this, AddSceneCo(scene, useAddressables));
 		}
 
         protected override IEnumerator RunRoutine()
@@ -218,19 +244,27 @@ namespace Acciaio.Sys
 		public SceneOperation LoadScene(string scene, bool useAddressables, bool autoHideLoadingView) 
 			=> LoadScene(scene, useAddressables, null, autoHideLoadingView);
 
-		public SceneOperation LoadScene(string scene, bool useAddressables, string loadingScene, bool autoHideLoadingView = true)
+		public SceneOperation LoadScene(SceneReference scene, bool autoHideLoadingView = true)
+			=> LoadScene(scene, null, autoHideLoadingView);
+
+		public SceneOperation LoadScene(SceneReference scene, SceneReference loadingScene, bool autoHideLoadingView = true)
 		{
-			if (!IsRunning)
+			var path = scene.Path;
+			var isAddressable = false;
+			
+#if USE_ADDRESSABLES
+			isAddressable = scene.IsAddressable;
+#endif
+			
+#if UNITY_EDITOR
+			if (scene.IsEditorOverrideable)
 			{
-				Debug.LogError("[Scenes System] System shut down, cannot load a scene.");
-				return null;
+				var editorScene = UnityEditor.EditorPrefs.GetString("Acciaio.Editor.EditingScene", null);
+				if (!string.IsNullOrEmpty(editorScene) && SceneManager.GetActiveScene().name != editorScene)
+					path = editorScene;
 			}
-
-			if (_operation != null)
-				throw new InvalidOperationException("A scene is already being loaded, cannot load another one");
-
-			_operation = new(this, LoadSceneCo(scene, useAddressables, loadingScene, autoHideLoadingView));
-			return _operation;
+#endif
+			return LoadScene(path, isAddressable, loadingScene?.Path, autoHideLoadingView);
 		}
 
 		public SceneOperation AddScene(string scene) => AddScene(scene, false);
@@ -239,16 +273,15 @@ namespace Acciaio.Sys
 		public SceneOperation AddAddressablesScene(string scenePath) => AddScene(scenePath, true);
 #endif
 
-		public SceneOperation AddScene(string scene, bool useAddressables)
-		{
-			if (!IsRunning)
-			{
-				Debug.LogError("[Scenes System] System shut down, cannot add a scene.");
-				return null;
-			}
-
-			return new(this, AddSceneCo(scene, useAddressables));
-		}
+	    public SceneOperation AddScene(SceneReference scene)
+	    {
+		    var path = scene.Path;
+		    var isAddressable = false;
+#if USE_ADDRESSABLES
+		    isAddressable = scene.IsAddressable;
+#endif
+		    return AddScene(path, isAddressable);
+	    }
 
 		public void RemoveScene(string sceneName)
 		{
@@ -276,8 +309,16 @@ namespace Acciaio.Sys
 			SceneManager.UnloadSceneAsync(scene);
 		}
 
-		public Scene GetSceneByName(string name) => SceneManager.GetSceneByName(name);
+		public Scene GetSceneByName(string sceneName) => SceneManager.GetSceneByName(sceneName);
 
+		public Scene GetSceneByPath(string scenePath) => SceneManager.GetSceneByPath(scenePath);
+
+		public Scene GetSceneByPathOrName(string pathOrName)
+		{
+			if (pathOrName.Contains("/") || pathOrName.EndsWith(".unity")) return GetSceneByPath(pathOrName);
+			return GetSceneByName(pathOrName);
+		}
+		
 		public YieldInstruction HideCurrentLoadingView() => StartCoroutine(HideLoadingViewCo());
     }
 }

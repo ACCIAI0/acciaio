@@ -22,13 +22,7 @@ namespace Acciaio.Editor.Settings
 		private static void SetPlayModeStartScene(string scene)
 		{
 			SceneAsset asset = null;
-			if (!string.IsNullOrEmpty(scene))
-			{
-				var path = EditorBuildSettings.scenes.FirstOrDefault(s => s.path.EndsWith($"{scene}.unity"))?.path;
-				if (path == null)
-					Debug.LogError($"Scene {scene} is not present in build settings.");
-				else asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
-			}
+			if (!string.IsNullOrEmpty(scene)) asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene);
 
 			EditorSceneManager.playModeStartScene = asset;
 		}
@@ -38,7 +32,7 @@ namespace Acciaio.Editor.Settings
 			var settings = GetOrCreateSettings();
 			if (change == PlayModeStateChange.ExitingEditMode)
 			{
-				SetPlayModeStartScene(settings != null && settings._isActive ? settings._startupScene : null);
+				SetPlayModeStartScene(settings != null && settings._isActive ? settings._editorStartupScene.Path : null);
 
 				if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
 				{
@@ -89,9 +83,9 @@ namespace Acciaio.Editor.Settings
 		internal static SerializedObject GetSerializedSettings() => new(GetOrCreateSettings());
 
 		[SerializeField]
-		private bool _isActive = false;
+		private bool _isActive;
 
 		[SerializeField]
-		private string _startupScene = null;
+		private SceneReference _editorStartupScene;
 	}
 }

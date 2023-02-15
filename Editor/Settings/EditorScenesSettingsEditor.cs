@@ -9,12 +9,13 @@ namespace Acciaio.Editor.Settings
 	[CustomEditor(typeof(EditorScenesSettings))]
 	public sealed class EditorScenesSettingsEditor : UnityEditor.Editor
 	{
-		private const string NoneValue = "(None)";
 		private const int TitleMarginTop = 2;
 		private const int TitleMarginLeft = 9;
 		private const int TitleFontSize = 19;
 		
 		private const string SettingsMenuPath = "Acciaio/Scenes";
+
+		private static readonly SceneReferenceDrawer ReferenceDrawer = new();
 
 		[SettingsProvider]
 		public static SettingsProvider Provide()
@@ -28,22 +29,12 @@ namespace Acciaio.Editor.Settings
 				}
 			};
 		}
-
-		private SerializedProperty _startupScene;
-		private SerializedProperty _isActive;
-
-		private void OnEnable()
-		{
-			_startupScene = serializedObject.FindProperty("_startupScene");
-			_isActive = serializedObject.FindProperty("_isActive");
-		}
 		
 		public override VisualElement CreateInspectorGUI()
 		{
-			VisualElement rootElement = new();
-
+			var startupScene = serializedObject.FindProperty("_editorStartupScene");
 			var isActive = serializedObject.FindProperty("_isActive");
-			var startupScene = serializedObject.FindProperty("_startupScene");
+			VisualElement rootElement = new();
 
 			var container = new VisualElement
 			{
@@ -63,44 +54,29 @@ namespace Acciaio.Editor.Settings
 					unityFontStyleAndWeight = FontStyle.Bold
 				}
 			};
-
-			var scenes = AcciaioEditor.BuildScenesArrayForField(true, NoneValue).ToList();
-			var defaultValue = startupScene.stringValue;
-			if (string.IsNullOrEmpty(defaultValue) || !scenes.Contains(defaultValue)) defaultValue = NoneValue;
-
-			PopupField<string> popup = new("Editor Startup Scene", scenes, defaultValue);
-			popup.style.flexGrow = 1;
-			popup.style.flexShrink = 1;
-			popup.style.overflow = Overflow.Hidden;
-			popup.SetEnabled(isActive.boolValue);
-
-			popup.RegisterValueChangedCallback<string>(evt =>
-            {
-                var value = evt.newValue;
-                if (value == NoneValue) value = "";
-                startupScene.stringValue = value;
-                serializedObject.ApplyModifiedProperties();
-            });
-
+			
+			var reference = ReferenceDrawer.CreatePropertyGUI(startupScene, null);
+			reference.SetEnabled(isActive.boolValue);
+			
 			Toggle toggle = new()
 			{
 				value = isActive.boolValue
 			};
 
-			toggle.RegisterValueChangedCallback<bool>(evt => 
+			toggle.RegisterValueChangedCallback(evt => 
             {
                 isActive.boolValue = evt.newValue; 
-                popup.SetEnabled(isActive.boolValue);
+                reference.SetEnabled(isActive.boolValue);
                 serializedObject.ApplyModifiedProperties();
             });
 
 			container.Add(toggle);
-			container.Add(popup);
+			container.Add(reference);
 			
 			rootElement.Add(title);
 			rootElement.Add(new Label());
 			rootElement.Add(container);
-
+			
 			return rootElement;
 		}
 	}

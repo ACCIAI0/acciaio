@@ -5,21 +5,20 @@ namespace Acciaio
 {
 	public static class CoroutineRunner
 	{
-		private const string RunnerGameObjectName = "[ACCIAIO] COROUTINE RUNNER";
 		private sealed class Runner : MonoBehaviour { }
 
 		private sealed class DelayedAction : CancelableDelay
 		{
 			private readonly System.Action _action;
 
-            public DelayedAction(System.Action action, float delay) : base(delay) => _action = action;
+			public DelayedAction(System.Action action, float delay) : base(delay) => _action = action;
 
-            protected override IEnumerator Execution()
-            {
-                _action?.Invoke();
+			protected override IEnumerator Execution()
+			{
+				_action?.Invoke();
 				yield break;
-            }
-        }
+			}
+		}
 
 		public abstract class CancelableDelay : CustomYieldInstruction
 		{
@@ -50,6 +49,8 @@ namespace Acciaio
 
 			public void Cancel() => Stop(_routine);
 		}
+		
+		private const string RunnerGameObjectName = "[ACCIAIO] COROUTINE RUNNER";
 
 		private static MonoBehaviour _runner;
 
