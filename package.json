@@ -1,7 +1,7 @@
 {
   "name": "com.abambini.acciaio",
   "displayName": "Acciaio",
-  "version": "1.0.1-alpha",
+  "version": "1.0.2-alpha",
   "description": "C# library for Unity. This core package also provides an entire architecture for developing high-level game systems.",
   "unity": "2021.3",
   "documentationUrl": "https://github.com/ACCIAI0/acciaio-systems/wiki",
