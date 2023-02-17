@@ -6,6 +6,14 @@ namespace Acciaio
     [Serializable]
     public sealed class SceneReference
     {
+#if UNITY_EDITOR
+        [SerializeField]
+        private string _assetGuid;
+#endif
+        
+        [SerializeField]
+        private string _path;
+        
 #if USE_ADDRESSABLES
         [field: SerializeField]
         public bool IsAddressable { get; private set; }
@@ -16,13 +24,36 @@ namespace Acciaio
         public bool IsEditorOverrideable { get; private set; }
 #endif
 
-        [field: SerializeField]
-        public string Path { get; private set; }
+        public string Path
+        {
+            get
+            {
+#if UNITY_EDITOR
+                EditorReferenceConsistencyCheck();
+#endif
+                return _path;
+            }
+        }
 
-        public SceneReference(string path) => Path = path;
+        public SceneReference(string path) => _path = path;
         
 #if USE_ADDRESSABLES
         public SceneReference(string path, bool isAddressable) : this(path) => IsAddressable = isAddressable;
+#endif
+
+#if UNITY_EDITOR
+        private void EditorReferenceConsistencyCheck()
+        {
+            if (string.IsNullOrEmpty(_assetGuid)) return;
+
+            var assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(_assetGuid);
+
+            if (assetPath.Equals(_path, StringComparison.Ordinal)) return;
+
+            _path = assetPath;
+            
+            Debug.LogWarning($"A scene reference changed but was not explicitly updated: {assetPath}");
+        }
 #endif
 
         public override bool Equals(object other)

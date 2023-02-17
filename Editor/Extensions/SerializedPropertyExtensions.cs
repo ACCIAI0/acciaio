@@ -80,13 +80,12 @@ namespace Acciaio.Editor.Extensions
                     .SetValue(property, gradient);
         }
 
-		public static Type GetPropertyType(this SerializedProperty property) => GetObject(property, false).GetType();
+		public static Type GetPropertyType(this SerializedProperty property) => GetObject(property, false)?.GetType();
 
         public static T GetValue<T>(this SerializedProperty property)
         {
             var @object = GetObject(property, false);
             if (@object is T tObject) return tObject;
-            Debug.LogError($"{property.name} is not a valid {typeof(T).Name}");
             return default;
         }
 

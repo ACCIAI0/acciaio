@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Acciaio
 {
     [Serializable]
-    public class Id
+    public class Id : IEquatable<Id>
     {
         [SerializeField]
         private string _value;

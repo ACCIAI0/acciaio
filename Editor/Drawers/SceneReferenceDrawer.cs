@@ -13,10 +13,12 @@ namespace Acciaio.Editor
     {
         private readonly struct PropertiesTuple
         {
-            private const string PathName = "<Path>k__BackingField";
+            private const string GuidName = "_assetGuid";
+            private const string PathName = "_path";
             private const string IsEditorOverrideableName = "<IsEditorOverrideable>k__BackingField";
             private const string IsAddressableName = "<IsAddressable>k__BackingField";
 
+            private readonly SerializedProperty _propertyGuid;
             private readonly SerializedProperty _propertyPath;
             private readonly SerializedProperty _propertyIsEditorOverrideable;
             private readonly SerializedProperty _propertyIsAddressable;
@@ -24,6 +26,14 @@ namespace Acciaio.Editor
             public string DisplayNameOfParentProperty { get; }
 
             public bool CanBeOverriddenInEditor { get; }
+
+            public bool IsPrefabOverride => _propertyGuid.prefabOverride;
+            
+            public GUID Guid
+            {
+                get => new(_propertyGuid.stringValue);
+                set => _propertyGuid.stringValue = value.ToString();
+            }
             
             public string Path
             {
@@ -51,6 +61,7 @@ namespace Acciaio.Editor
 
             public PropertiesTuple(SerializedProperty property, string displayName = null)
             {
+                _propertyGuid = property.FindPropertyRelative(GuidName);
                 _propertyPath = property.FindPropertyRelative(PathName);
                 _propertyIsEditorOverrideable = property.FindPropertyRelative(IsEditorOverrideableName);
                 _propertyIsAddressable = property.FindPropertyRelative(IsAddressableName);
@@ -59,7 +70,12 @@ namespace Acciaio.Editor
                 CanBeOverriddenInEditor = property.GetAttribute<AllowEditorOverrideAttribute>() is not null;
             }
 
-            public void ApplyModifiedProperties() => _propertyPath.serializedObject.ApplyModifiedProperties();
+            public void SerializeAsset(SceneAsset asset)
+            {
+                Path = AssetDatabase.GetAssetPath(asset);
+                Guid = AssetDatabase.GUIDFromAssetPath(Path);
+                _propertyPath.serializedObject.ApplyModifiedProperties();
+            }
         }
         
         private const int IconWidth = 18;
@@ -136,6 +152,26 @@ namespace Acciaio.Editor
 #endif
         }
 
+        private static SceneAsset RetrieveSceneAsset(PropertiesTuple properties)
+        {
+            if (properties.Guid.Empty()) return null;
+
+            var assetPath = AssetDatabase.GUIDToAssetPath(properties.Guid);
+
+            if (assetPath is null)
+            {
+                properties.Guid = new(string.Empty);
+                properties.Path = string.Empty;
+                return null;
+            }
+
+            var asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(assetPath);
+            if (!properties.Path.Equals(assetPath, StringComparison.Ordinal))
+                properties.SerializeAsset(asset);
+
+            return asset;
+        }
+        
         private static VisualElement CreateValuesFields(PropertiesTuple properties)
         {
             VisualElement values = new()
@@ -148,7 +184,7 @@ namespace Acciaio.Editor
                 }
             };
 
-            var asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(properties.Path);
+            var asset = RetrieveSceneAsset(properties);
             
             properties.IsAddressable = IsSceneAddressable(asset);
             
@@ -170,11 +206,14 @@ namespace Acciaio.Editor
                 value = asset,
                 style =
                 {
+                    unityFontStyleAndWeight = properties.IsPrefabOverride ? FontStyle.Bold : FontStyle.Normal,
                     flexGrow = 1,
                     flexShrink = 1,
                     overflow = Overflow.Hidden
                 }
             };
+            sceneAsset.Q<Label>().style.unityFontStyleAndWeight = 
+                    properties.IsPrefabOverride ? FontStyle.Bold : FontStyle.Normal;
 
             Image isOverrideableToggle = new()
             {
@@ -202,9 +241,8 @@ namespace Acciaio.Editor
             sceneAsset.RegisterValueChangedCallback(evt =>
             {
                 var scene = evt.newValue as SceneAsset;
-                properties.Path = AssetDatabase.GetAssetPath(scene);
                 properties.IsAddressable = IsSceneAddressable(scene);
-                properties.ApplyModifiedProperties();
+                properties.SerializeAsset(scene);
                 
                 var iconName = GetAddressablesIconName(properties.IsAddressable);
                 isAddressableIcon.tooltip = properties.IsAddressable ? AddressableTooltip : BuildSettingsTooltip;
@@ -213,6 +251,11 @@ namespace Acciaio.Editor
                 iconName = GetValidityIconName(scene);
                 validityIcon.tooltip = GetValidityTooltip(scene);
                 validityIcon.image = EditorGUIUtility.IconContent(iconName).image;
+                
+                sceneAsset.style.unityFontStyleAndWeight =
+                    properties.IsPrefabOverride ? FontStyle.Bold : FontStyle.Normal;
+                sceneAsset.Q<Label>().style.unityFontStyleAndWeight = 
+                    properties.IsPrefabOverride ? FontStyle.Bold : FontStyle.Normal;
             });
             
             values.Add(validityIcon);
@@ -223,12 +266,25 @@ namespace Acciaio.Editor
             return values;
         }
 
-        public VisualElement CreatePropertyGUI(SerializedProperty property, string displayName)
+        public static bool UpdateProperty(SerializedProperty property)
         {
-            PropertiesTuple properties = new(property, displayName);
+            if (property.GetPropertyType() != typeof(SceneReference))
+            {
+                Debug.LogError($"Property {property.displayName} is not of type SceneReference");
+                return false;
+            }
 
-            return CreateValuesFields(properties);
+            var tuple = new PropertiesTuple(property);
+            var path = tuple.Path;
+            RetrieveSceneAsset(tuple);
+            return !path.Equals(tuple.Path, StringComparison.Ordinal);
         }
+
+        public VisualElement CreatePropertyGUI(SerializedProperty property, string displayName) 
+            => CreateValuesFields(new PropertiesTuple(property, displayName));
+
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
+            => CreatePropertyGUI(property, null);
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
             => EditorGUIUtility.singleLineHeight;
@@ -241,7 +297,7 @@ namespace Acciaio.Editor
             if(properties.CanBeOverriddenInEditor) fieldWidth -= IconWidth;
             if (properties.CanBeAddressable) fieldWidth -= IconWidth;
 
-            var scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(properties.Path);
+            var scene = RetrieveSceneAsset(properties);
             
             properties.IsAddressable = IsSceneAddressable(scene);
             
@@ -257,15 +313,22 @@ namespace Acciaio.Editor
             constructionRect.width = fieldWidth;
 
             EditorGUIUtility.labelWidth -= IconWidth;
-            var newScene = 
+
+            if (properties.IsPrefabOverride)
+            {
+                EditorStyles.objectField.fontStyle = FontStyle.Bold;
+                EditorStyles.label.fontStyle = FontStyle.Bold;
+            }
+            var newScene =
                     EditorGUI.ObjectField(constructionRect, label, scene, typeof(SceneAsset), false) as SceneAsset;
+            EditorStyles.objectField.fontStyle = FontStyle.Normal;
+            EditorStyles.label.fontStyle = FontStyle.Normal;
             EditorGUIUtility.labelWidth = 0;
 
             if (newScene != scene)
             {
-                properties.Path = AssetDatabase.GetAssetPath(newScene);
                 properties.IsAddressable = IsSceneAddressable(newScene);
-                properties.ApplyModifiedProperties();
+                properties.SerializeAsset(newScene);
             }
 
             if (properties.CanBeAddressable)
@@ -289,8 +352,5 @@ namespace Acciaio.Editor
                 }
             }
         }
-
-        public override VisualElement CreatePropertyGUI(SerializedProperty property)
-            => CreatePropertyGUI(property, null);
     }
 }

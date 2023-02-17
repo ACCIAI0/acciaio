@@ -87,5 +87,8 @@ namespace Acciaio.Editor.Settings
 
 		[SerializeField]
 		private SceneReference _editorStartupScene;
+
+		[field: SerializeField]
+		public bool EnableReferencesConsistency { get; private set; }
 	}
 }

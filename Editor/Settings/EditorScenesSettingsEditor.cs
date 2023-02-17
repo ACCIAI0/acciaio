@@ -34,6 +34,8 @@ namespace Acciaio.Editor.Settings
 		{
 			var startupScene = serializedObject.FindProperty("_editorStartupScene");
 			var isActive = serializedObject.FindProperty("_isActive");
+			var consistency = serializedObject.FindProperty("<EnableReferencesConsistency>k__BackingField");
+			
 			VisualElement rootElement = new();
 
 			var container = new VisualElement
@@ -60,22 +62,26 @@ namespace Acciaio.Editor.Settings
 			
 			Toggle toggle = new()
 			{
-				value = isActive.boolValue
+				value = isActive.boolValue,
+				bindingPath = isActive.propertyPath
 			};
 
-			toggle.RegisterValueChangedCallback(evt => 
-            {
-                isActive.boolValue = evt.newValue; 
-                reference.SetEnabled(isActive.boolValue);
-                serializedObject.ApplyModifiedProperties();
-            });
+			toggle.RegisterValueChangedCallback(evt => reference.SetEnabled(isActive.boolValue));
 
 			container.Add(toggle);
 			container.Add(reference);
+
+			Toggle consistencyToggle = new(consistency.displayName)
+			{
+				value = consistency.boolValue,
+				bindingPath = consistency.propertyPath
+			};
 			
 			rootElement.Add(title);
 			rootElement.Add(new Label());
 			rootElement.Add(container);
+			rootElement.Add(new Label());
+			rootElement.Add(consistencyToggle);
 			
 			return rootElement;
 		}
