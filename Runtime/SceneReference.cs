@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Acciaio
 {
     [Serializable]
-    public class SceneReference
+    public sealed class SceneReference
     {
 #if USE_ADDRESSABLES
         [field: SerializeField]

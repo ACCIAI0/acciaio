@@ -6,5 +6,5 @@ namespace Acciaio
 {
     [Conditional("UNITY_EDITOR")]
     [AttributeUsage(AttributeTargets.Field)]
-    public class AllowEditorOverrideAttribute : PropertyAttribute { }
+    public sealed class AllowEditorOverrideAttribute : PropertyAttribute { }
 }

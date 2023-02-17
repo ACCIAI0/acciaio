@@ -9,7 +9,7 @@ using Image = UnityEngine.UIElements.Image;
 namespace Acciaio.Editor
 {
     [CustomPropertyDrawer(typeof(SceneReference))]
-    public class SceneReferenceDrawer : PropertyDrawer
+    public sealed class SceneReferenceDrawer : PropertyDrawer
     {
         private readonly struct PropertiesTuple
         {
