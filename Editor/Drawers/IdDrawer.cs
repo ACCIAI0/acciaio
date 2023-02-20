@@ -88,8 +88,9 @@ namespace Acciaio.Editor
     [CustomPropertyDrawer(typeof(ReferenceId<>))]
     public class ReferenceIdDrawer : PropertyDrawer
     {
-        private const string ValueName = "_value";
         private const string GuidName = "_assetGuid";
+        private const string RefIdName = "<ReferencedId>k__BackingField";
+        private const string ValueName = "_value";
         
         private const int DisplayIdMaxLength = 16;
         private const int DisplayIdTrimmedHalfLength = 5;
@@ -134,7 +135,7 @@ namespace Acciaio.Editor
         
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
-            var valueProperty = property.FindPropertyRelative(ValueName);
+            var valueProperty = property.FindPropertyRelative(RefIdName).FindPropertyRelative(ValueName);
             var guidProperty = property.FindPropertyRelative(GuidName);
             var refType = property.GetPropertyType().GetGenericArguments()[0];
             var obj = GetObject(valueProperty, guidProperty, refType);
@@ -146,13 +147,13 @@ namespace Acciaio.Editor
 
             if (ReferenceEquals(newObj, obj)) return;
             
-            valueProperty.stringValue = ((IIdentifiable)newObj).Id;
+            valueProperty.stringValue = ((IIdentifiable)newObj)?.Id;
             guidProperty.stringValue = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(newObj)).ToString();
         }
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            var valueProperty = property.FindPropertyRelative(ValueName);
+            var valueProperty = property.FindPropertyRelative(RefIdName).FindPropertyRelative(ValueName);
             var guidProperty = property.FindPropertyRelative(GuidName);
             var refType = property.GetPropertyType().GetGenericArguments()[0];
             var obj = GetObject(valueProperty, guidProperty, refType);
@@ -169,10 +170,10 @@ namespace Acciaio.Editor
                 var newObj = evt.newValue;
                 if (ReferenceEquals(newObj, obj)) return;
                 
-                var newLabel = obj is null ? property.displayName : $"{property.displayName} ({((IIdentifiable)obj).Id})";
+                var newLabel = CalculateLabel(property.displayName, ((IIdentifiable)newObj)?.Id);
                 field.label = newLabel;
                 
-                valueProperty.stringValue = ((IIdentifiable)newObj).Id;
+                valueProperty.stringValue = ((IIdentifiable)newObj)?.Id;
                 guidProperty.stringValue = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(newObj)).ToString();
             });
             

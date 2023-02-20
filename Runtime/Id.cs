@@ -50,32 +50,30 @@ namespace Acciaio
     }
 
     [Serializable]
-    public sealed class ReferenceId<T> where T : IIdentifiable
+    public struct ReferenceId<T> where T : IIdentifiable
     {
 #if UNITY_EDITOR
         [SerializeField]
         private string _assetGuid;
 #endif
 
-        [SerializeField]
-        private string _value;
-        
-        private ReferenceId() { } // Used by Unity
+        [field: SerializeField]
+        public Id ReferencedId { get; private set; }
 
-        public ReferenceId(Id value) => _value = value;
-
-        public bool Is(T value) => value?.Id?.Equals(_value) ?? false;
-
-        public bool Equals(ReferenceId<T> refId)
+        public ReferenceId(Id value)
         {
-            return ReferenceEquals(this, refId) || 
-                        (refId is not null && _value.Equals(refId._value));
+            _assetGuid = null;
+            ReferencedId = value;
         }
+
+        public bool Is(T value) => value?.Id?.Equals(ReferencedId) ?? false;
+
+        public bool Equals(ReferenceId<T> refId) => ReferencedId == refId.ReferencedId;
 
         public override bool Equals(object other) => other is ReferenceId<T> refId && Equals(refId);
         
         // It's effectively readonly at runtime
         // ReSharper disable once NonReadonlyMemberInGetHashCode
-        public override int GetHashCode() => _value.GetHashCode();
+        public override int GetHashCode() => ReferencedId.GetHashCode();
     }
 }
