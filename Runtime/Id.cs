@@ -6,6 +6,8 @@ namespace Acciaio
     [Serializable]
     public class Id : IEquatable<Id>
     {
+        public static readonly Id Empty = new();
+        
         [SerializeField]
         private string _value;
 
@@ -46,7 +48,9 @@ namespace Acciaio
     [Serializable]
     public sealed class AutoId : Id
     {
-        public AutoId() : base(Guid.NewGuid().ToString()) { }
+        public static AutoId NewId() => new();
+        
+        private AutoId() : base(Guid.NewGuid().ToString()) { }
         
         private AutoId(string id) : base(id) { }
         
