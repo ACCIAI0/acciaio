@@ -202,6 +202,7 @@ namespace Acciaio.Editor
 
             ObjectField sceneAsset = new(properties.DisplayNameOfParentProperty)
             {
+                allowSceneObjects = false,
                 objectType = typeof(SceneAsset),
                 value = asset,
                 style =
