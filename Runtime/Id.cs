@@ -46,7 +46,7 @@ namespace Acciaio
     [Serializable]
     public sealed class AutoId : Id
     {
-        private AutoId() : base(Guid.NewGuid().ToString()) { }
+        public AutoId() : base(Guid.NewGuid().ToString()) { }
         
         private AutoId(string id) : base(id) { }
         
