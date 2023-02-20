@@ -9,14 +9,14 @@ namespace Acciaio
         [SerializeField]
         private string _value;
 
-        protected Id() : this(string.Empty) { } // Used by Unity
+        private Id() : this(string.Empty) { } // Used by Unity
 
         public Id(string value) => _value = value;
 
         public bool Equals(string other) 
             => ReferenceEquals(_value, other) || _value.Equals(other, StringComparison.Ordinal);
 
-        public virtual bool Equals(Id other)
+        public bool Equals(Id other)
         {
             return other is not null &&
                     (ReferenceEquals(this, other) || _value.Equals(other._value, StringComparison.Ordinal));
@@ -46,9 +46,11 @@ namespace Acciaio
     [Serializable]
     public sealed class AutoId : Id
     {
-        public AutoId() : base(Guid.NewGuid().ToString()) { }
+        private AutoId() : base(Guid.NewGuid().ToString()) { }
         
-        public AutoId(Id id) : base(id) { }
+        private AutoId(string id) : base(id) { }
+        
+        public static implicit operator AutoId(string str) => str is null ? null : new(str);
     }
 
     [Serializable]
