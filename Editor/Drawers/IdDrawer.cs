@@ -131,7 +131,7 @@ namespace Acciaio.Editor
         }
         
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-            => EditorGUI.GetPropertyHeight(property.FindPropertyRelative(ValueName));
+            => EditorGUI.GetPropertyHeight(property.FindPropertyRelative(RefIdName).FindPropertyRelative(ValueName));
         
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
