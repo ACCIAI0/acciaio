@@ -19,29 +19,29 @@ namespace Acciaio.Editor
         private const string GenButtonIcon = "d_Refresh";
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-            => EditorGUI.GetPropertyHeight(property.FindPropertyRelative(ValueName));
+            => new SerializedId(property).Height;
 
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
-            var valueProperty = property.FindPropertyRelative(ValueName);
+            var id = new SerializedId(property);
             
             Rect construction = new(rect);
             construction.width -= ButtonWidth;
 
-            EditorGUI.BeginDisabledGroup(property.GetPropertyType() == typeof(AutoId));
-            EditorGUI.PropertyField(construction, valueProperty, label);
+            EditorGUI.BeginDisabledGroup(property.type.Equals(nameof(AutoId), StringComparison.Ordinal));
+            EditorGUI.PropertyField(construction, id.AsSerializedProperty(), label);
             EditorGUI.EndDisabledGroup();
 
             construction.x += construction.width;
             construction.width = ButtonWidth;
 
             if (GUI.Button(construction, EditorGUIUtility.IconContent(GenButtonIcon), EditorStyles.label)) 
-                valueProperty.stringValue = Guid.NewGuid().ToString();
+                id.StringValue = Guid.NewGuid().ToString();
         }
         
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            var valueProperty = property.FindPropertyRelative(ValueName);
+            var id = new SerializedId(property);
             
             VisualElement root = new()
             {
@@ -53,8 +53,8 @@ namespace Acciaio.Editor
 
             TextField valueField = new(property.displayName)
             {
-                value = valueProperty.stringValue,
-                bindingPath = valueProperty.propertyPath,
+                value = id.StringValue,
+                bindingPath = id.PropertyPath,
                 style =
                 {
                     flexGrow = 1,
@@ -74,10 +74,8 @@ namespace Acciaio.Editor
                 }
             };
             
-            genButton.RegisterCallback<ClickEvent, SerializedProperty>(
-                (_, prop) => prop.stringValue = Guid.NewGuid().ToString(),
-                valueProperty
-            );
+            genButton.RegisterCallback<ClickEvent, SerializedId>(
+                (_, prop) => prop.StringValue = Guid.NewGuid().ToString(), id);
             
             root.Add(valueField);
             root.Add(genButton);
@@ -97,21 +95,21 @@ namespace Acciaio.Editor
 
         private static readonly StringBuilder LabelBuilder = new();
 
-        private static UnityEngine.Object GetObject(SerializedProperty valueProperty, SerializedProperty guidProperty, Type refType)
+        private static UnityEngine.Object GetObject(SerializedId id, SerializedProperty guidProperty, Type refType)
         {
             if (string.IsNullOrEmpty(guidProperty.stringValue))
             {
                 var guid = AssetDatabase.FindAssets($"t:{refType.Name}")
                     .FirstOrDefault(guid => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), refType) != null);
                 if (!string.IsNullOrEmpty(guid)) guidProperty.stringValue = guid;
-                else valueProperty.stringValue = null;
+                else id.StringValue = null;
             }
 
             if (string.IsNullOrEmpty(guidProperty.stringValue)) return null;
             
             var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guidProperty.stringValue), refType);
             var idObj = (IIdentifiable)obj;
-            if (idObj.Id != valueProperty.stringValue) valueProperty.stringValue = idObj.Id;
+            if (idObj.Id != id.StringValue) id.StringValue = idObj.Id;
 
             return obj;
         }
@@ -141,10 +139,10 @@ namespace Acciaio.Editor
         
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
-            var valueProperty = property.FindPropertyRelative(RefIdName).FindPropertyRelative(ValueName);
+            var id = property.FindIdRelative(RefIdName);
             var guidProperty = property.FindPropertyRelative(GuidName);
             var refType = property.GetPropertyType().GetGenericArguments()[0];
-            var obj = GetObject(valueProperty, guidProperty, refType);
+            var obj = GetObject(id, guidProperty, refType);
             
             var newLabel = CalculateLabel(label.text, ((IIdentifiable)obj)?.Id);
             EditorStyles.label.richText = true;
@@ -153,16 +151,16 @@ namespace Acciaio.Editor
 
             if (ReferenceEquals(newObj, obj)) return;
             
-            valueProperty.stringValue = ((IIdentifiable)newObj)?.Id;
+            id.IdValue = ((IIdentifiable)newObj)?.Id;
             guidProperty.stringValue = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(newObj)).ToString();
         }
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            var valueProperty = property.FindPropertyRelative(RefIdName).FindPropertyRelative(ValueName);
+            var id = property.FindIdRelative(RefIdName);
             var guidProperty = property.FindPropertyRelative(GuidName);
             var refType = property.GetPropertyType().GetGenericArguments()[0];
-            var obj = GetObject(valueProperty, guidProperty, refType);
+            var obj = GetObject(id, guidProperty, refType);
 
             ObjectField field = new(CalculateLabel(property.displayName, ((IIdentifiable)obj)?.Id))
             {
@@ -179,7 +177,7 @@ namespace Acciaio.Editor
                 var newLabel = CalculateLabel(property.displayName, ((IIdentifiable)newObj)?.Id);
                 field.label = newLabel;
                 
-                valueProperty.stringValue = ((IIdentifiable)newObj)?.Id;
+                id.IdValue = ((IIdentifiable)newObj)?.Id;
                 guidProperty.stringValue = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(newObj)).ToString();
             });
             

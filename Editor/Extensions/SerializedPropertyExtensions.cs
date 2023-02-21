@@ -59,6 +59,20 @@ namespace Acciaio.Editor.Extensions
             return @object;
         }
 
+        public static SerializedId FindIdRelative(this SerializedProperty property, string path)
+        {
+	        var idProperty = property.FindPropertyRelative(path);
+
+	        if (idProperty is null) return null;
+	        if (idProperty.type != nameof(Id) && idProperty.type != nameof(AutoId))
+	        {
+		        Debug.LogError($"Property of type {idProperty.type} is being extracted as IdProperty.");
+		        return null;
+	        }
+
+	        return new(idProperty);
+        }
+
         public static Gradient GetGradientValue(this SerializedProperty property)
         {
             if (property.propertyType != SerializedPropertyType.Gradient) return null;

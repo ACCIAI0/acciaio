@@ -7,13 +7,15 @@ namespace Acciaio
     public class Id : IEquatable<Id>
     {
         public static readonly Id Empty = new();
+
+        public static Id NewId(string value) => new(value);
         
         [SerializeField]
         private string _value;
 
         private Id() : this(string.Empty) { } // Used by Unity
 
-        public Id(string value) => _value = value;
+        protected internal Id(string value) => _value = value;
 
         public bool Equals(string other) 
             => ReferenceEquals(_value, other) || _value.Equals(other, StringComparison.Ordinal);
