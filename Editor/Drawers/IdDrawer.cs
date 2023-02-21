@@ -91,21 +91,23 @@ namespace Acciaio.Editor
 
         private static UnityEngine.Object GetObject(SerializedReferenceId reference, Type refType)
         {
+            static IIdentifiable Retrieve(string guid, Type refType) 
+                => (IIdentifiable)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), refType);
+            
             if (string.IsNullOrEmpty(reference.GuidValue))
             {
                 var guid = AssetDatabase.FindAssets($"t:{refType.Name}")
-                    .FirstOrDefault(guid => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), refType) != null);
+                        .FirstOrDefault(guid =>  Retrieve(guid, refType).Id == reference.IdValue);
                 if (!string.IsNullOrEmpty(guid)) reference.GuidValue = guid;
                 else reference.StringValue = null;
             }
 
             if (string.IsNullOrEmpty(reference.GuidValue)) return null;
             
-            var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(reference.GuidValue), refType);
-            var idObj = (IIdentifiable)obj;
-            if (idObj.Id != reference.StringValue) reference.StringValue = idObj.Id;
+            var obj = Retrieve(reference.GuidValue, refType);
+            if (obj.Id != reference.StringValue) reference.StringValue = obj.Id;
 
-            return obj;
+            return (UnityEngine.Object)obj;
         }
 
         private static string CalculateLabel(string defaultLabel, string id)
