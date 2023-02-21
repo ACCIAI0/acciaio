@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace Acciaio.Editor.Extensions
@@ -17,6 +18,20 @@ namespace Acciaio.Editor.Extensions
             }
 
             return new(property);
+        }
+        
+        public static SerializedReferenceId FindReferenceId(this SerializedObject sObject, string path)
+        {
+            var refProperty = sObject.FindProperty(path);
+
+            if (refProperty is null) return null;
+            if (refProperty.type != nameof(Id) && refProperty.type != typeof(ReferenceId<>).Name)
+            {
+                Debug.LogError($"Property of type {refProperty.type} is being extracted as ReferenceIdProperty.");
+                return null;
+            }
+
+            return new(refProperty);
         }
     }
 }
