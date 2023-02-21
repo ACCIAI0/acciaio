@@ -12,8 +12,6 @@ namespace Acciaio.Editor
     [CustomPropertyDrawer(typeof(Id), true)]
     public class IdDrawer : PropertyDrawer
     {
-        private const string ValueName = "_value";
-
         private const float ButtonWidth = 18;
 
         private const string GenButtonIcon = "d_Refresh";
@@ -86,8 +84,6 @@ namespace Acciaio.Editor
     [CustomPropertyDrawer(typeof(ReferenceId<>))]
     public class ReferenceIdDrawer : PropertyDrawer
     {
-        private const string GuidName = "_assetGuid";
-        private const string RefIdName = "<ReferencedId>k__BackingField";
         private const string ValueName = "_value";
         
         private const int DisplayIdMaxLength = 16;
@@ -95,21 +91,21 @@ namespace Acciaio.Editor
 
         private static readonly StringBuilder LabelBuilder = new();
 
-        private static UnityEngine.Object GetObject(SerializedId id, SerializedProperty guidProperty, Type refType)
+        private static UnityEngine.Object GetObject(SerializedReferenceId reference, Type refType)
         {
-            if (string.IsNullOrEmpty(guidProperty.stringValue))
+            if (string.IsNullOrEmpty(reference.GuidValue))
             {
                 var guid = AssetDatabase.FindAssets($"t:{refType.Name}")
                     .FirstOrDefault(guid => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), refType) != null);
-                if (!string.IsNullOrEmpty(guid)) guidProperty.stringValue = guid;
-                else id.StringValue = null;
+                if (!string.IsNullOrEmpty(guid)) reference.GuidValue = guid;
+                else reference.StringValue = null;
             }
 
-            if (string.IsNullOrEmpty(guidProperty.stringValue)) return null;
+            if (string.IsNullOrEmpty(reference.GuidValue)) return null;
             
-            var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guidProperty.stringValue), refType);
+            var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(reference.GuidValue), refType);
             var idObj = (IIdentifiable)obj;
-            if (idObj.Id != id.StringValue) id.StringValue = idObj.Id;
+            if (idObj.Id != reference.StringValue) reference.StringValue = idObj.Id;
 
             return obj;
         }
@@ -135,14 +131,13 @@ namespace Acciaio.Editor
         }
         
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-            => EditorGUI.GetPropertyHeight(property.FindPropertyRelative(RefIdName).FindPropertyRelative(ValueName));
+            => new SerializedReferenceId(property).Height;
         
         public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
         {
-            var id = property.FindIdRelative(RefIdName);
-            var guidProperty = property.FindPropertyRelative(GuidName);
+            var reference = new SerializedReferenceId(property);
             var refType = property.GetPropertyType().GetGenericArguments()[0];
-            var obj = GetObject(id, guidProperty, refType);
+            var obj = GetObject(reference, refType);
             
             var newLabel = CalculateLabel(label.text, ((IIdentifiable)obj)?.Id);
             EditorStyles.label.richText = true;
@@ -151,16 +146,15 @@ namespace Acciaio.Editor
 
             if (ReferenceEquals(newObj, obj)) return;
             
-            id.IdValue = ((IIdentifiable)newObj)?.Id;
-            guidProperty.stringValue = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(newObj)).ToString();
+            reference.IdValue = ((IIdentifiable)newObj)?.Id;
+            reference.GuidValue = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(newObj)).ToString();
         }
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            var id = property.FindIdRelative(RefIdName);
-            var guidProperty = property.FindPropertyRelative(GuidName);
+            var reference = new SerializedReferenceId(property);
             var refType = property.GetPropertyType().GetGenericArguments()[0];
-            var obj = GetObject(id, guidProperty, refType);
+            var obj = GetObject(reference, refType);
 
             ObjectField field = new(CalculateLabel(property.displayName, ((IIdentifiable)obj)?.Id))
             {
@@ -177,8 +171,8 @@ namespace Acciaio.Editor
                 var newLabel = CalculateLabel(property.displayName, ((IIdentifiable)newObj)?.Id);
                 field.label = newLabel;
                 
-                id.IdValue = ((IIdentifiable)newObj)?.Id;
-                guidProperty.stringValue = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(newObj)).ToString();
+                reference.IdValue = ((IIdentifiable)newObj)?.Id;
+                reference.GuidValue = AssetDatabase.GUIDFromAssetPath(AssetDatabase.GetAssetPath(newObj)).ToString();
             });
             
             return field;
