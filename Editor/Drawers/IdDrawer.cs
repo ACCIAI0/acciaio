@@ -84,8 +84,6 @@ namespace Acciaio.Editor
     [CustomPropertyDrawer(typeof(ReferenceId<>))]
     public class ReferenceIdDrawer : PropertyDrawer
     {
-        private const string ValueName = "_value";
-        
         private const int DisplayIdMaxLength = 16;
         private const int DisplayIdTrimmedHalfLength = 5;
 
