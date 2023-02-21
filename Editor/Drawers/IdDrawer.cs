@@ -99,13 +99,19 @@ namespace Acciaio.Editor
 
         private static UnityEngine.Object GetObject(SerializedProperty valueProperty, SerializedProperty guidProperty, Type refType)
         {
-            UnityEngine.Object obj = null;
-            if (!string.IsNullOrEmpty(guidProperty.stringValue))
+            if (string.IsNullOrEmpty(guidProperty.stringValue))
             {
-                obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guidProperty.stringValue), refType);
-                var idObj = (IIdentifiable)obj;
-                if (idObj.Id != valueProperty.stringValue) valueProperty.stringValue = idObj.Id;
+                var guid = AssetDatabase.FindAssets($"t:{refType.Name}")
+                    .FirstOrDefault(guid => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), refType) != null);
+                if (!string.IsNullOrEmpty(guid)) guidProperty.stringValue = guid;
+                else valueProperty.stringValue = null;
             }
+
+            if (string.IsNullOrEmpty(guidProperty.stringValue)) return null;
+            
+            var obj = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guidProperty.stringValue), refType);
+            var idObj = (IIdentifiable)obj;
+            if (idObj.Id != valueProperty.stringValue) valueProperty.stringValue = idObj.Id;
 
             return obj;
         }
