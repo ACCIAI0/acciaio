@@ -81,8 +81,8 @@ namespace Acciaio.Editor
         }
     }
 
-    [CustomPropertyDrawer(typeof(ReferenceId<>))]
-    public class ReferenceIdDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(IdReference<>))]
+    public class IdReferenceDrawer : PropertyDrawer
     {
         private const int DisplayIdMaxLength = 16;
         private const int DisplayIdTrimmedHalfLength = 5;
@@ -112,7 +112,7 @@ namespace Acciaio.Editor
 
         private static string CalculateLabel(string defaultLabel, string id)
         {
-            if (id is null) return defaultLabel;
+            if (string.IsNullOrEmpty(id)) return defaultLabel;
 
             LabelBuilder.Append(defaultLabel)
                     .Append(" (<color=\"red\"><b>");

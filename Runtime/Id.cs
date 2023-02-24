@@ -60,7 +60,7 @@ namespace Acciaio
     }
 
     [Serializable]
-    public struct ReferenceId<T> where T : IIdentifiable
+    public struct IdReference<T> where T : IIdentifiable
     {
 #if UNITY_EDITOR
         [SerializeField]
@@ -70,7 +70,7 @@ namespace Acciaio
         [field: SerializeField]
         public Id ReferencedId { get; private set; }
 
-        public ReferenceId(Id value)
+        public IdReference(Id value)
         {
             _assetGuid = null;
             ReferencedId = value;
@@ -78,9 +78,9 @@ namespace Acciaio
 
         public bool Is(T value) => value?.Id?.Equals(ReferencedId) ?? false;
 
-        public bool Equals(ReferenceId<T> refId) => ReferencedId == refId.ReferencedId;
+        public bool Equals(IdReference<T> @ref) => ReferencedId == @ref.ReferencedId;
 
-        public override bool Equals(object other) => other is ReferenceId<T> refId && Equals(refId);
+        public override bool Equals(object other) => other is IdReference<T> refId && Equals(refId);
         
         // It's effectively readonly at runtime
         // ReSharper disable once NonReadonlyMemberInGetHashCode

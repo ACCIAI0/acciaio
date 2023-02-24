@@ -25,7 +25,7 @@ namespace Acciaio.Editor.Extensions
             var refProperty = sObject.FindProperty(path);
 
             if (refProperty is null) return null;
-            if (refProperty.type != nameof(Id) && refProperty.type != typeof(ReferenceId<>).Name)
+            if (refProperty.type != nameof(Id) && refProperty.type != typeof(IdReference<>).Name)
             {
                 Debug.LogError($"Property of type {refProperty.type} is being extracted as ReferenceIdProperty.");
                 return null;
