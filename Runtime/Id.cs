@@ -72,7 +72,9 @@ namespace Acciaio
 
         public IdReference(Id value)
         {
+#if UNITY_EDITOR
             _assetGuid = null;
+#endif
             ReferencedId = value;
         }
 
