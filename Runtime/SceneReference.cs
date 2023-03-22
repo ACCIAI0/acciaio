@@ -75,7 +75,7 @@ namespace Acciaio
 #if USE_ADDRESSABLES
             return HashCode.Combine(Path.GetHashCode(), IsAddressable.GetHashCode());
 #else
-            return Name.GetHashCode();
+            return Path.GetHashCode();
 #endif
             // ReSharper restore NonReadonlyMemberInGetHashCode
         }
