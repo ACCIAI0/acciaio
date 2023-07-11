@@ -33,6 +33,16 @@ namespace Acciaio.Collections.Generic
         public int Count => _list.Count;
         
         public bool IsReadOnly => false;
+        
+        public IdentifiablesCollection() { }
+
+        public IdentifiablesCollection(int capacity)
+        {
+            _list = new(capacity);
+            _dictionary = new(capacity);
+        }
+
+        public IdentifiablesCollection(IEnumerable<T> elements) => _list = elements.ToList();
 
         public bool TryGetValue(Id id, out T value) => Dictionary.TryGetValue(id, out value);
 
@@ -42,6 +52,15 @@ namespace Acciaio.Collections.Generic
             
             Dictionary.Add(item.Id, item);
             _list.Add(item);
+        }
+
+        public void AddRange(IEnumerable<T> items)
+        {
+            foreach (var item in items)
+            {
+                if (item == null) continue;
+                Add(item);
+            }
         }
 
         public void Clear()
