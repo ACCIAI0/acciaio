@@ -9,11 +9,13 @@ using UnityEngine.UIElements;
 
 namespace Acciaio.Editor.Collections.Generic
 {
-    [CustomPropertyDrawer(typeof(Map<,>), true)]
+    [CustomPropertyDrawer(typeof(MapBase<,,>), true)]
     public sealed class MapDrawer : PropertyDrawer
     {
-        private const int Margin = 2;
         private const int IconSize = 18;
+        private const int Padding = 2;
+        private const int CountFieldOffset = 18;
+        private const int CountFieldWidth = 48;
         private const string WarnIconName = "console.warnicon@2x";
         private const string ErrIconName = "console.erroricon@2x";
         private const string ListName = "_serializedEntries";
@@ -46,9 +48,9 @@ namespace Acciaio.Editor.Collections.Generic
             if (_lists.ContainsKey(property.propertyPath)) return _lists[property.propertyPath];
 
             var names = fieldInfo.GetCustomAttribute<MapNamesAttribute>();
-            ReorderableList list = new(property.serializedObject, property, true, true, true, true)
+            ReorderableList list = new(property.serializedObject, property, true, false, true, true)
             {
-                drawHeaderCallback = rect => EditorGUI.LabelField(rect, label),
+                headerHeight = 0,
                 elementHeightCallback = index =>
                 {
                     if (property.arraySize == 0) return EditorGUIUtility.singleLineHeight;
@@ -72,7 +74,7 @@ namespace Acciaio.Editor.Collections.Generic
                     var isNullKey = key.propertyType == SerializedPropertyType.ObjectReference && key.objectReferenceValue == null;
                     if (isNullKey || IsAlreadyPresent(property, index))
                     {
-                        var iconRect = new Rect(rect.x - IconSize, rect.y + Margin, IconSize,
+                        var iconRect = new Rect(rect.x - IconSize, rect.y, IconSize,
                             IconSize);
                         var icon = isNullKey ? ErrIconName : WarnIconName;
                         keyTooltip = isNullKey ? NullTooltip : DupTooltip;
@@ -80,7 +82,7 @@ namespace Acciaio.Editor.Collections.Generic
                         keyName = string.Format(isNullKey ? KeyNullName : KeyDupName, keyName);
                     }
 
-                    var keyRect = new Rect(rect.x, rect.y + Margin, rect.width, EditorGUI.GetPropertyHeight(key, true));
+                    var keyRect = new Rect(rect.x, rect.y, rect.width, EditorGUI.GetPropertyHeight(key, true));
                     EditorStyles.label.richText = true;
                     EditorGUI.PropertyField(keyRect, key, new GUIContent(keyName, keyTooltip), true);
                     EditorStyles.label.richText = false;
@@ -105,17 +107,50 @@ namespace Acciaio.Editor.Collections.Generic
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            if (!property.isExpanded) return EditorGUIUtility.singleLineHeight;
+            
             var totHeight = 0f;
 
             var serializedEntries = property.FindPropertyRelative(ListName);
             totHeight += RetrieveList(serializedEntries, label).GetHeight();
 
-            return totHeight;
+            return totHeight + EditorGUIUtility.singleLineHeight + Padding;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var serializedEntries = property.FindPropertyRelative(ListName);
+            
+            var foldoutRect = new Rect(position)
+            {
+                width = position.width - CountFieldWidth,
+                height = EditorGUIUtility.singleLineHeight
+            };
+
+            var countRect = new Rect(position)
+            {
+                x = position.width - CountFieldWidth + CountFieldOffset,
+                width = CountFieldWidth,
+                height = EditorGUIUtility.singleLineHeight
+            };
+
+            var foldoutStyle = new GUIStyle(EditorStyles.foldout)
+            {
+                fontStyle = FontStyle.Bold
+            };
+
+            property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, label, true, foldoutStyle);
+            
+            serializedEntries.arraySize = EditorGUI.IntField(countRect, GUIContent.none, serializedEntries.arraySize);
+            
+            if (!property.isExpanded)
+            {
+                property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
+                return;
+            }
+
+            position.y += EditorGUIUtility.singleLineHeight + Padding;
+            position.height -= foldoutRect.height;
             RetrieveList(serializedEntries, label).DoList(position);
             property.GetValue<ISerializationCallbackReceiver>().OnAfterDeserialize();
         }

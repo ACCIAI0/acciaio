@@ -105,7 +105,7 @@ namespace Acciaio.Editor
             if (string.IsNullOrEmpty(reference.GuidValue)) return null;
             
             var obj = Retrieve(reference.GuidValue, refType);
-            if (obj.Id != reference.StringValue) reference.StringValue = obj.Id;
+            if (obj != null && obj.Id != reference.StringValue) reference.StringValue = obj.Id;
 
             return (UnityEngine.Object)obj;
         }

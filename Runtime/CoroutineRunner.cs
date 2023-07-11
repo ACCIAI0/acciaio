@@ -5,7 +5,10 @@ namespace Acciaio
 {
 	public static class CoroutineRunner
 	{
-		private sealed class Runner : MonoBehaviour { }
+		private sealed class Runner : MonoBehaviour
+		{
+			private Runner() { }
+		}
 
 		private sealed class DelayedAction : CancelableDelay
 		{

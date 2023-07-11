@@ -59,28 +59,33 @@ namespace Acciaio
         public static implicit operator AutoId(string str) => str is null ? null : new(str);
     }
 
+    public abstract class IdReference
+    {
+        [field: SerializeField]
+        public Id ReferencedId { get; private set; }
+
+        protected IdReference(Id value) => ReferencedId = value;
+    }
+
     [Serializable]
-    public struct IdReference<T> where T : IIdentifiable
+    public class IdReference<T> : IdReference where T : IIdentifiable
     {
 #if UNITY_EDITOR
         [SerializeField]
         private string _assetGuid;
 #endif
+        private IdReference() : base(null) { }
 
-        [field: SerializeField]
-        public Id ReferencedId { get; private set; }
-
-        public IdReference(Id value)
+        public IdReference(Id value) : base(value)
         {
 #if UNITY_EDITOR
             _assetGuid = null;
 #endif
-            ReferencedId = value;
         }
 
-        public bool Is(T value) => value?.Id?.Equals(ReferencedId) ?? false;
+        public bool References(T value) => value?.Id?.Equals(ReferencedId) ?? false;
 
-        public bool Equals(IdReference<T> @ref) => ReferencedId == @ref.ReferencedId;
+        public bool Equals(IdReference<T> @ref) => @ref is not null && ReferencedId == @ref.ReferencedId;
 
         public override bool Equals(object other) => other is IdReference<T> refId && Equals(refId);
         

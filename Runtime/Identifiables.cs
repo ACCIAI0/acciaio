@@ -10,6 +10,8 @@ namespace Acciaio
     public abstract class IdentifiableObject : ScriptableObject, IIdentifiable
     {
         public abstract Id Id { get; } 
+        
+        protected IdentifiableObject() { }
 		
         public override bool Equals(object other) 
             => other is IdentifiableObject ido && Equals(ido);
@@ -24,6 +26,8 @@ namespace Acciaio
     {
         [SerializeField]
         protected TId ID;
+        
+        protected IdentifiableObject() { }
 
         public override Id Id => ID;
     }
@@ -31,6 +35,8 @@ namespace Acciaio
     public abstract class IdentifiableBehaviour : MonoBehaviour, IIdentifiable
     {
         public abstract Id Id { get; } 
+        
+        protected IdentifiableBehaviour() { }
 		
         public override bool Equals(object other) 
             => other is IdentifiableBehaviour ido && Equals(ido);
@@ -47,5 +53,7 @@ namespace Acciaio
         protected TId ID;
 
         public override Id Id => ID;
+        
+        protected IdentifiableBehaviour() { }
     }
 }
