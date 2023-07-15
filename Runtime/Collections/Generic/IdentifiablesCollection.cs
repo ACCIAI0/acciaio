@@ -34,7 +34,11 @@ namespace Acciaio.Collections.Generic
         
         public bool IsReadOnly => false;
         
-        public IdentifiablesCollection() { }
+        public IdentifiablesCollection()
+        {
+            _list = new();
+            _dictionary = new();
+        }
 
         public IdentifiablesCollection(int capacity)
         {
@@ -42,7 +46,11 @@ namespace Acciaio.Collections.Generic
             _dictionary = new(capacity);
         }
 
-        public IdentifiablesCollection(IEnumerable<T> elements) => _list = elements.ToList();
+        public IdentifiablesCollection(IEnumerable<T> elements)
+        {
+            _list = elements.ToList();
+            _dictionary = _list.ToDictionary(i => i.Id, i => i);
+        }
 
         public bool TryGetValue(Id id, out T value) => Dictionary.TryGetValue(id, out value);
 
