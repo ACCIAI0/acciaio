@@ -14,9 +14,23 @@ namespace Acciaio.Collections.Generic
 
         private Dictionary<Id, T> _dictionary;
 
-        private Dictionary<Id, T> Dictionary => _dictionary ??= _list.ToDictionary(i => i.Id, i => i);
+        private Dictionary<Id, T> Dictionary 
+        {
+            get
+            {
+                _dictionary ??= _list.ToDictionary(i => i.Id, i => i);
+                
+                if (_dictionary.Count != _list.Count)
+                {
+                    _dictionary.Clear();
+                    foreach (var i in _list) _dictionary.Add(i.Id, i);
+                }
 
-        public T this[int index]
+                return _dictionary;
+            }
+        }
+
+    public T this[int index]
         {
             get => _list[index];
             set => _list[index] = value;
