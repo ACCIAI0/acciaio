@@ -1,6 +1,4 @@
-using System.Linq;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -62,25 +60,33 @@ namespace Acciaio.Editor.Settings
 			
 			Toggle toggle = new()
 			{
-				value = isActive.boolValue,
-				bindingPath = isActive.propertyPath
+				value = isActive.boolValue
 			};
 
-			toggle.RegisterValueChangedCallback(evt => reference.SetEnabled(isActive.boolValue));
+			toggle.RegisterValueChangedCallback(evt =>
+			{
+				isActive.boolValue = evt.newValue;
+				serializedObject.ApplyModifiedProperties();
+				reference.SetEnabled(isActive.boolValue);
+			});
 
 			container.Add(toggle);
 			container.Add(reference);
 
 			Toggle consistencyToggle = new(consistency.displayName)
 			{
-				value = consistency.boolValue,
-				bindingPath = consistency.propertyPath
+				value = consistency.boolValue
 			};
+
+			consistencyToggle.RegisterValueChangedCallback(evt =>
+			{
+				consistency.boolValue = evt.newValue;
+				serializedObject.ApplyModifiedProperties();
+			});
 			
 			rootElement.Add(title);
 			rootElement.Add(new Label());
 			rootElement.Add(container);
-			rootElement.Add(new Label());
 			rootElement.Add(consistencyToggle);
 			
 			return rootElement;

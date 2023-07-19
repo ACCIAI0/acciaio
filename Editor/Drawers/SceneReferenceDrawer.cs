@@ -81,7 +81,7 @@ namespace Acciaio.Editor
         private const int IconWidth = 18;
         
         private const string IsEditorOverrideableTooltip =
-            "If active (white), this scene will be overridden with the scene that was being edited befor clicking \"play\"";
+            "If active (white), this scene will be overridden with the active scene before entering playmode";
         
         private const string InvalidTooltip =
             "This scene is neither flagged as Addressables or present in the Build Order";
@@ -145,6 +145,7 @@ namespace Acciaio.Editor
             
 #if USE_ADDRESSABLES
             var settings = UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null) return false;
             var entry = settings.FindAssetEntry(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)));
             return entry != null;
 #else

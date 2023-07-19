@@ -19,12 +19,14 @@ namespace Acciaio.Editor.Settings
 
         static EditorScenesSettings() => EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 
-		private static void SetPlayModeStartScene(string scene)
+		private static bool SetPlayModeStartScene(string scene)
 		{
 			SceneAsset asset = null;
 			if (!string.IsNullOrEmpty(scene)) asset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene);
 
 			EditorSceneManager.playModeStartScene = asset;
+
+			return asset != null;
 		}
 
 		private static void OnPlayModeStateChanged(PlayModeStateChange change)
@@ -32,7 +34,12 @@ namespace Acciaio.Editor.Settings
 			var settings = GetOrCreateSettings();
 			if (change == PlayModeStateChange.ExitingEditMode)
 			{
-				SetPlayModeStartScene(settings != null && settings._isActive ? settings._editorStartupScene.Path : null);
+				if (!SetPlayModeStartScene(settings != null && settings._isActive
+					    ? settings._editorStartupScene.Path
+					    : null))
+				{
+					return;
+				}
 
 				if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
 				{
