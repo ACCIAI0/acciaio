@@ -8,8 +8,12 @@ namespace Acciaio
     {
         public static readonly Id Empty = new();
 
-        public static Id NewId(string value) => new(value);
-        
+        public static Id OfValue(string value)
+        {
+            if (string.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(value));
+            return new(value);
+        }
+
         [SerializeField]
         private string _value;
 
@@ -50,7 +54,7 @@ namespace Acciaio
     [Serializable]
     public sealed class AutoId : Id
     {
-        public static AutoId NewId() => new();
+        public static AutoId Generate() => new();
         
         private AutoId() : base(Guid.NewGuid().ToString()) { }
         
@@ -64,7 +68,13 @@ namespace Acciaio
         [field: SerializeField]
         public Id ReferencedId { get; private set; }
 
+        public bool IsValid => ReferencedId != null && !string.IsNullOrEmpty(ReferencedId.ToString());
+
         protected IdReference(Id value) => ReferencedId = value;
+        
+        public bool References(Id value) => ReferencedId == value;
+        
+        public static implicit operator Id(IdReference @ref) => @ref.ReferencedId;
     }
 
     [Serializable]
@@ -92,5 +102,7 @@ namespace Acciaio
         // It's effectively readonly at runtime
         // ReSharper disable once NonReadonlyMemberInGetHashCode
         public override int GetHashCode() => ReferencedId.GetHashCode();
+
+        public static implicit operator Id(IdReference<T> @ref) => @ref.ReferencedId;
     }
 }
