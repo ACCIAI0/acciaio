@@ -12,13 +12,14 @@ namespace Acciaio.Editor
     [CustomPropertyDrawer(typeof(SingleFlagValueAttribute))]
     public sealed class SingleFlagValueAttributeDrawer : PropertyDrawer
     {
+        private const string WrongFieldTypeMessage =
+            "SingleFlagValue Attribute is not assigned to an enum field/property.";
+        
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.propertyType != SerializedPropertyType.Enum)
             {
-                Debug.LogWarning(
-                    $"SingleFlagValue Attribute is not assigned to an enum field/property. '{property.displayName}' is {property.propertyType}"
-                );
+                Debug.LogWarning(WrongFieldTypeMessage);
                 EditorGUI.PropertyField(position, property, label);
                 return;
             }
@@ -50,6 +51,19 @@ namespace Acciaio.Editor
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
+            if (property.propertyType != SerializedPropertyType.Enum)
+            {
+                Debug.LogWarning(WrongFieldTypeMessage);
+                return new PropertyField(property);
+            }
+            
+            var propertyType = property.GetPropertyType();
+            if (propertyType.GetCustomAttribute<FlagsAttribute>() == null)
+            {
+                Debug.LogWarning($"{propertyType.Name} is not marked as Flags");
+                return new PropertyField(property);
+            }
+            
             var values = Enum.GetValues(property.GetPropertyType()).Cast<Enum>().ToList();
             PopupField<Enum> popup = new(values, property.enumValueIndex)
             {
