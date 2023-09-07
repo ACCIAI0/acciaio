@@ -10,7 +10,7 @@ It offers the following functionalities:
 - the **Systems** infrastructure.
 
 ## Overview
-This section presents an overview of the points above. For some of them, the overview should be enough to understand and use the feature, whilst the others are presentede in more details in the [Wiki](../../wiki/Home).
+This section presents an overview of the points above. For some of them, the overview should be enough to understand and use the feature, whilst the others are presented in more details in the [Wiki](../../wiki/Home).
 
 ### Installation
 Acciaio for Unity can be added to a Unity project through the Package Manager as a Git URL. There are plans to publish it on a public repository, but for the time being this is the only available method.
@@ -20,12 +20,12 @@ Acciaio for Unity can be added to a Unity project through the Package Manager as
 >
 > **COMPATIBLE WITH**: Unity **2021.3.x and higher**.
 
-### <span style="color:green">Extension Methods</span>
+### $\textcolor{green}{\textsf{Extension Methods}}$
 Many extension methods have been added for vector-like types (from `Vector2` to `Color`) that should reduce the number of boilerplate required to change or swizzle single components. 
 
 For instance: all Vector types now have a method `yx()` which returns a `Vector2` with x component equal to the y component of the starting vector and viceversa. All types have methods of the family `With_(float value)` where the underscore represent any of the components (*x, y, z, w* for vectors and *r, g, b, a* for colors.) Multiple calls can be chained: `vector = vector.WithX(0).WithZ(1)...`, but it's *preferable to use the constructor if most components are going to change*.
 
-### CoroutineRunner
+### $\textcolor{green}{\textsf{Coroutine Runner}}$
 The class `CoroutineRunner` allows to statically start and stop coroutine, using the same syntax Unity has always offered:
 
 ```C#
@@ -55,15 +55,24 @@ var cancelableDelay = CoroutineRunner.ExecuteAfterSeconds(Action, 1.0f);
 cancelableDelay.Cancel();
 ```
 
+### $\textcolor{darkred}{\textsf{Systems}}$
+The Systems architecture proposes a different paradigm for handling high-level functionalities that span across scenes and the scenes themselves. 
+
+In order to enable the Systems, this package provides a handy-dandy shortcut to create and pre-populate a *Systems scene*: `Tools >> Acciaio >> Create Systems Scene`. This scene contains all Systems of the application and once loaded it won't be unloaded until the application is closed. It can be loaded by simply calling `Systems.Load()`, which loads up the scene and initializes all Systems. If the Systems scene has been renamed the method to call is `Systems.Load("Systems_Scene_Name")`. Both calls return a data structure that can be yielded upon to wait for the full initialization. 
+
+The Systems scene comes with two default Systems: `ScenesSystem` and `PubSubSystem`. 
+
+The ScenesSystem is used to handle scenes and is supposed to replace the native ScenesManager. It exposes functionalities to Load and Unload scenes from both the build and Addressables. It automatically handles fading screens (if assigned) and can use SceneReferences to load the corresponding scene (see [Scene Reference Wiki](../../wiki/SceneReference).) Together with this System comes another feature of Acciaio: the override of the starting scene when playing from editor. If enabled from the Project settings, pressing play will start the game from the scene specified in the Project settings instead of the one that was being edited. This can be used to always guarantee, for example, the execution of some bootstrap logic before any scene is actually loaded.
+
+The PubSubSystem is used to transfer settings or configurations between scenes.
+
+Users can add new Systems to the scene and they will be automatically initialized together with the default ones when calling `Systems.Load()`. Custom Systems can be created by extending the type `BaseSystem<T>` or implementing `ISystem<T>`, although the second method won't allow to access that system as a Singleton.
+
+> [!NOTE]
+> Systems not on a root GameObject will be ignored when initializing the Systems scene.
 ___
 ### Quick References
 
 - [Systems](../../wiki/Systems)
 - [Editor Scenes Settings](../../wiki/EditorScenesSettings)
 - [Extensions](../../wiki/Extensions)
-
-## Systems
-
-The `Systems` scene is the heart of the architecture and **cannot be renamed** or it will cause runtime errors. It contains two pre-made systems and more can be added by the user in form of GameObjects with Components that derive from `ISystem`. Each GameObject in the root of the scene has **one and only one** System attached to it, any `ISystem` not on a root GameObject will be ignored.
-
-**NOTE**: Systems will be accessible with the Singleton pattern only if they are subclasses of `BaseSystem<TSystem>`. For all the other Systems they're still available through queries to the `Systems` class.
