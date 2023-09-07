@@ -1,18 +1,24 @@
-# Acciaio Systems
+# Acciaio for Unity
 
-A package that offers the following main functionalities:
-- Easy to use Editor Scenes settings and setup flow
-- Extension methods for common `UnityEngine` types such as `Color` and `Vector3`.
-- **Systems architecture**
+This library is part of the .NET Acciaio Project, a collection of libraries that can be used in different contexts where C# or .NET are involved. In particular, this library focuses on Unity runtime and editor.
+It offers the following functionalities:
+- Extension methods for common `UnityEngine` types such as `Vector2`, `Vector2Int`, `Vector3`, `Vector3Int`, `Vector4` and `Color`.
+- Extension methods for `IEnumerable<T>` and other System.Collections.Generic implementing logic that could be of use for games such as shuffling the elements inside a collection
+- A `CoroutineRunner` utility for starting/stopping globally managed Coroutines 
+- New serializable types for specific use cases such as `Map<TKey, TValue` (a serializable dictionary), `TypeReference` (for referencing specific types) or `SceneReference` (used together with the `ScenesSystem`).
+- An `Id` and `IdReference` architecture for both persistence and runtime decoupling
+- the **Systems** infrastructure.
 
 ## Overview
+### Installation
+Acciaio for Unity can be added to a Unity project through the Package Manager as a Git URL. There are plans to publish it on a public repository, but for the time being this is the only available method.
 
-The main feature of this package is the Systems architecture, a set of tools and classes that aims at quickly setting up and managing the main aspects of a Game in an easy to use manner. To begin, just click **Tools>>Acciaio>>Create Systems Scene**. This will automatically create a new scene `Assets/_Scenes/Systems.unity`, pre-populated with two ready-to-use Systems.
+> [!IMPORTANT]
+> The Package Manager doesn't handle versioning when installing packages as a Git URL and won't notify if there are new versions available to download. For the same reason, it won't allow to do a rollback to an older version after an update. Plase, refer to this page to check if the new version is compatible with your version of the Unity editor.
 
-Acciaio Systems also provides settings to tell Unity which scene to load when the Play button is pressed in the Editor. It is useful to always start the game from a bootstrap or initialization scene even when testing a specific scene without following the real game flow. 
-These settings resides in an asset that can be created through **Tools>>Acciaio>>Create Editor Scenes Settings** or through the Create contextual menu **Create>>Acciaio>>Editor Scenes Settings**. 
+### Extension Methods
 
-**NOTE**: If created through the Create contextual menu, the new asset must be placed under *Assets/Editor/*, while the Tools menu will automatically place it in there, creating the folder if it doesn't exists.
+
 ___
 ### Quick References
 
