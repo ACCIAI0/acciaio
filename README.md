@@ -13,6 +13,7 @@ It offers the following functionalities:
 This section presents an overview of the points above. For some of them, the overview should be enough to understand and use the feature, whilst the others are presented in more details in the [Wiki](../../wiki/Home).
 
 ### Installation
+
 > [!INFO]
 > **COMPATIBLE WITH**: Unity **2021.3.x and higher**.
 
