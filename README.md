@@ -85,7 +85,7 @@ The PubSubSystem is used to transfer settings or configurations between scenes.
 Users can add new Systems to the scene and they will be automatically initialized together with the default ones when calling `Systems.Load()`. Custom Systems can be created by extending the type `BaseSystem<T>` or implementing `ISystem<T>`, although the second method won't allow to access that system as a Singleton.
 
 > [!NOTE]
-> Systems not on a root GameObject will be $\textcolor{red}{\textsf{ignored}}$ when initializing the Systems scene.
+> Systems not on a root GameObject will be **ignored** when initializing the Systems scene.
 ___
 ### Quick References
 
