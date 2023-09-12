@@ -71,8 +71,10 @@ cancelableDelay.Cancel();
 The Systems architecture proposes a different paradigm for handling high-level functionalities that span across scenes and the scenes themselves. 
 
 In order to enable the Systems, this package provides a handy-dandy shortcut to create and pre-populate a *Systems scene*: 
-```Tools >> Acciaio >> Create Systems Scene```
-This scene contains all Systems of the application and once loaded it won't be unloaded until the application is closed. It can be loaded by simply calling `Systems.Load()`, which loads up the scene and initializes all Systems. If the Systems scene has been renamed the method to call is `Systems.Load("Systems_Scene_Name")`. Both calls return a data structure that can be yielded upon to wait for the full initialization. 
+```
+Tools >> Acciaio >> Create Systems Scene
+```
+This scene contains all Systems of the application and once loaded it won't be unloaded until the application is closed. It can be loaded by simply calling `Systems.Load()`, which loads up the scene and initializes all Systems. If the Systems scene has been renamed the method to call is `Systems.Load(<Systems_Scene_Name>)`. Both calls return a data structure that can be yielded upon to wait for the full initialization. 
 
 The Systems scene comes with two default Systems: `ScenesSystem` and `PubSubSystem`. 
 
@@ -83,7 +85,7 @@ The PubSubSystem is used to transfer settings or configurations between scenes.
 Users can add new Systems to the scene and they will be automatically initialized together with the default ones when calling `Systems.Load()`. Custom Systems can be created by extending the type `BaseSystem<T>` or implementing `ISystem<T>`, although the second method won't allow to access that system as a Singleton.
 
 > [!NOTE]
-> Systems not on a root GameObject will be ignored when initializing the Systems scene.
+> Systems not on a root GameObject will be $\textcolor{red}{\textsf{ignored}}$ when initializing the Systems scene.
 ___
 ### Quick References
 
