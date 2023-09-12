@@ -14,7 +14,7 @@ This section presents an overview of the points above. For some of them, the ove
 
 ### Installation
 
-> [!INFO]
+> [!NOTE]
 > **COMPATIBLE WITH**: Unity **2021.3.x and higher**.
 
 Acciaio for Unity can be added using the OpenUPM registry:
