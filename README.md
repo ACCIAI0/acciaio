@@ -1,7 +1,7 @@
 # Acciaio for Unity
 [![Unity 2021.3+](https://img.shields.io/badge/unity-2021.3%2B-blue.svg)](https://unity3d.com/get-unity/download)
 [![openupm](https://img.shields.io/npm/v/com.abambini.acciaio?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.abambini.acciaio/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://github.com/ACCIAI0/acciaio/blob/master/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-GPL-brightgreen.svg)](https://github.com/ACCIAI0/acciaio/blob/master/LICENSE)
 
 This library is part of the .NET Acciaio Project, a collection of libraries that can be used in different contexts where C# or .NET are involved. In particular, this library focuses on Unity runtime and editor.
 It offers the following functionalities:
