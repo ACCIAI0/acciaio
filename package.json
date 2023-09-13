@@ -1,7 +1,7 @@
 {
   "name": "com.abambini.acciaio",
   "displayName": "Acciaio",
-  "version": "1.0.0-pre",
+  "version": "1.0.0-pre.1",
   "description": "C# library for Unity. It provides an entire architecture for developing high-level game systems and utilities such as extension methods for common types and useful serializable types.",
   "unity": "2021.3",
   "documentationUrl": "https://github.com/ACCIAI0/acciaio-systems/wiki",
