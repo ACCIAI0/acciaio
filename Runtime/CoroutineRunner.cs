@@ -52,16 +52,16 @@ namespace Acciaio
 
 			public void Cancel() => Stop(_routine);
 		}
-		
-		private const string RunnerGameObjectName = "[ACCIAIO] COROUTINE RUNNER";
 
 		private static MonoBehaviour _runner;
 
 		public static Coroutine Start(IEnumerator routine)
 		{
+			const string runnerGameObjectName = "[ACCIAIO] COROUTINE RUNNER";
+			
 			if (_runner == null)
 			{
-				_runner = new GameObject(RunnerGameObjectName).AddComponent<Runner>();
+				_runner = new GameObject(runnerGameObjectName).AddComponent<Runner>();
 				Object.DontDestroyOnLoad(_runner.gameObject);
 			}
 			_runner.gameObject.SetActive(true);

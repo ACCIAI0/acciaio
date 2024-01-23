@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using UnityEngine;
 
 namespace Acciaio
@@ -14,12 +16,23 @@ namespace Acciaio
             return new(value);
         }
 
+        public static Id FromBytes(byte[] bytes) => OfValue(Encoding.Unicode.GetString(bytes));
+
+        public static Id FromBytes(ReadOnlySpan<byte> span) => OfValue(Encoding.Unicode.GetString(span));
+
         [SerializeField]
         private string _value;
 
         private Id() : this(string.Empty) { } // Used by Unity
 
         protected internal Id(string value) => _value = value;
+
+        public byte[] GetBytes() => Encoding.Unicode.GetBytes(_value);
+
+        public int GetBytes(byte[] bytes, int startIndex) 
+            => Encoding.Unicode.GetBytes(_value, 0, _value.Length, bytes, startIndex);
+
+        public int GetBytes(Span<byte> span) => Encoding.Unicode.GetBytes(_value, span);
 
         public bool Equals(string other) 
             => ReferenceEquals(_value, other) || _value.Equals(other, StringComparison.Ordinal);
@@ -32,7 +45,6 @@ namespace Acciaio
 
         public override bool Equals(object other) => other is Id id && Equals(id);
         
-        // It's effectively readonly at runtime
         // ReSharper disable once NonReadonlyMemberInGetHashCode
         public override int GetHashCode() => _value.GetHashCode();
 
@@ -81,8 +93,10 @@ namespace Acciaio
     public class IdReference<T> : IdReference where T : IIdentifiable
     {
 #if UNITY_EDITOR
+#pragma warning disable CS0414
         [SerializeField]
         private string _assetGuid;
+#pragma warning restore CS0414
 #endif
         private IdReference() : base(null) { }
 
@@ -99,7 +113,6 @@ namespace Acciaio
 
         public override bool Equals(object other) => other is IdReference<T> refId && Equals(refId);
         
-        // It's effectively readonly at runtime
         // ReSharper disable once NonReadonlyMemberInGetHashCode
         public override int GetHashCode() => ReferencedId.GetHashCode();
 

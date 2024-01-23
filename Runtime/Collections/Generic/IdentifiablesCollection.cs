@@ -30,7 +30,7 @@ namespace Acciaio.Collections.Generic
             }
         }
 
-    public T this[int index]
+        public T this[int index]
         {
             get => _list[index];
             set => _list[index] = value;
@@ -133,7 +133,9 @@ namespace Acciaio.Collections.Generic
             Dictionary.Remove(element.Id);
         }
 
-        public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
+        public List<T>.Enumerator GetEnumerator() => _list.GetEnumerator();
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => _list.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
